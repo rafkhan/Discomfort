@@ -17,6 +17,13 @@ float shaperGainPotInput = 0;
 float tiltPotInput = 0;
 float dryWetPotInput = 0;
 
+#define FOLDER_MAX_GAIN 50
+#define SHAPER_MAX_GAIN 20
+
+float mapFFFF(float x, float in_min, float in_max, float out_min, float out_max) {
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 void readAllAdcInputs() {
 	foldGainPotInput = hw.GetAdcValue(CV_1);
 	shaperGainPotInput = hw.GetAdcValue(CV_2);
@@ -31,16 +38,16 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 	{
 		OUT_L[i] = distChannelL.process(
 			IN_L[i],
-			foldGainPotInput,
-			shaperGainPotInput,
+			mapFFFF(foldGainPotInput, 0, 1, 1, FOLDER_MAX_GAIN),
+			mapFFFF(shaperGainPotInput, 0, 1, 1, SHAPER_MAX_GAIN),
 			tiltPotInput,
-			dryWetPotInput
+			mapFFFF(dryWetPotInput, 0, 1, 0, 1)
 		);
 
-		OUT_R[i] = distChannelL.process(
+		OUT_R[i] = distChannelR.process(
 			IN_R[i],
-			foldGainPotInput,
-			shaperGainPotInput,
+			mapFFFF(foldGainPotInput, 0, 1, 1, FOLDER_MAX_GAIN),
+			mapFFFF(shaperGainPotInput, 0, 1, 1, SHAPER_MAX_GAIN),
 			tiltPotInput,
 			dryWetPotInput
 		);
@@ -50,7 +57,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 int main(void)
 {
 	hw.Init();
-	hw.SetAudioBlockSize(4); // number of samples handled per callback
+	hw.SetAudioBlockSize(2); // number of samples handled per callback
 	hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 	hw.StartAudio(AudioCallback);
 	while(1) {

@@ -5,6 +5,8 @@ TARGET = firmware
 CPP_SOURCES = firmware.cpp
 CPP_SOURCES += Discomfort.cpp
 CPP_SOURCES += Folder.cpp
+CPP_SOURCES += Shaper.cpp
+CPP_SOURCES += DryWet.cpp
 
 # Library Locations
 LIBDAISY_DIR = ../../DaisyExamples/libDaisy/
