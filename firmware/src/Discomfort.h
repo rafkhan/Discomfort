@@ -44,6 +44,7 @@ class Discomfort {
     );
   private:
     Follower *follower;
+    FilterBank *filterBank;
     WhiteNoise noise;
 };
 

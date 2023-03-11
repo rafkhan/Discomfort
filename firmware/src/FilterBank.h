@@ -16,7 +16,7 @@ public:
 class FilterBank {
 public:
   FilterBank(float sampleRate);
-  float process(float input, FilterBankType type, float gainA, float gainB, float gainC, float gainD);
+  float process(float input, FilterBankType type, float levelA, float levelB, float levelC, float levelD);
  
 private:
   FilterBankBand *bandA, *bandB, *bandC, *bandD;

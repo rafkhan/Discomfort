@@ -7,6 +7,7 @@ Discomfort::Discomfort() {}
 
 void Discomfort::init(float sampleRate) {
   this->follower = new Follower(sampleRate, 1.0f, 30.0f);
+  this->filterBank = new FilterBank(sampleRate);
   noise.Init();
 }
 

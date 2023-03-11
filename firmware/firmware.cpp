@@ -26,7 +26,8 @@ float cv2 = 0;
 float cv3 = 0;
 float cv4 = 0;
 
-void readAllAdcInputs() {
+void readAllAdcInputs()
+{
 	pot1 = hw.GetAdcValue(CV_1);
 	pot2 = hw.GetAdcValue(CV_2);
 	pot3 = hw.GetAdcValue(CV_3);
@@ -38,38 +39,39 @@ void readAllAdcInputs() {
 	cv4 = hw.GetAdcValue(CV_8);
 }
 
-float process(float input, Discomfort *ch) {
+float process(float input, Discomfort *ch)
+{
 	return ch->process(
-		input,
-		1,
-		1,
+			input,
+			1,
+			1,
 
-		1, // map(foldGainPotInput, 0, 1, 1, FOLDER_MAX_GAIN),
-		0,
+			1, // map(foldGainPotInput, 0, 1, 1, FOLDER_MAX_GAIN),
+			0,
 
-		1, // map(shaperGainPotInput, 0, 1, 1, CLIPPER_MAX_GAIN),
-		CLIPPER_SOFT,
+			1, // map(shaperGainPotInput, 0, 1, 1, CLIPPER_MAX_GAIN),
+			CLIPPER_SOFT,
 
-		0,
+			0,
 
-		0,
-		0,
-		0, // map(tiltPotInput, 0, 1, 0, 1),
+			0,
+			0,
+			0, // map(tiltPotInput, 0, 1, 0, 1),
 
-		FILTERBANK_ON,
-		0,
-		0,
-		0,
-		0,
+			FILTERBANK_ON,
+			0,
+			0,
+			0,
+			0,
 
-		1
-	);
+			1);
 }
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
 	hw.ProcessAllControls();
-	for (size_t i = 0; i < size; i++) {
+	for (size_t i = 0; i < size; i++)
+	{
 		OUT_L[i] = process(IN_L[i], &distChannelL);
 		OUT_R[i] = process(IN_R[i], &distChannelR);
 	}
@@ -78,15 +80,16 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 int main(void)
 {
 	hw.Init();
-	hw.SetAudioBlockSize(2); // number of samples handled per callback
+	hw.SetAudioBlockSize(32);
 	hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_96KHZ);
-	sampleRate = hw.AudioSampleRate();
+  sampleRate = hw.AudioSampleRate();
 
 	distChannelL.init(sampleRate);
 	distChannelR.init(sampleRate);
 
 	hw.StartAudio(AudioCallback);
-	while(1) {
+	while (1)
+	{
 		readAllAdcInputs();
 	}
 }

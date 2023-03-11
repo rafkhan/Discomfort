@@ -35,3 +35,12 @@ FilterBank::FilterBank(float sampleRate) {
   bandC = new FilterBankBand(sampleRate, 1000, 10000);
   bandD = new FilterBankBand(sampleRate, 10000, 25000);
 }
+
+float FilterBank::process(float input, FilterBankType type, float levelA, float levelB, float levelC, float levelD) {
+  float outA = bandA->process(input, levelA);
+  float outB = bandB->process(input, levelB);
+  float outC = bandC->process(input, levelC);
+  float outD = bandD->process(input, levelD);
+
+  return outA + outB + outC + outD;
+}
