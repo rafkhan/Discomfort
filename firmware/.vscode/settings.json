@@ -3,6 +3,8 @@
     "*.tcc": "cpp",
     "limits": "cpp",
     "type_traits": "cpp",
-    "iostream": "cpp"
+    "iostream": "cpp",
+    "cmath": "cpp",
+    "random": "cpp"
   }
 }

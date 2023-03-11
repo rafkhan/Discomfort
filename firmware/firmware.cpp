@@ -1,56 +1,77 @@
 #include "daisy_patch_sm.h"
 #include "daisysp.h"
 
-#include "Discomfort.h"
+#include "src/Discomfort.h"
+#include "src/util.h"
+#include "src/Clipper.h"
+#include "src/Folder.h"
 
 using namespace daisy;
 using namespace patch_sm;
 using namespace daisysp;
 
 DaisyPatchSM hw;
+float sampleRate;
 
 Discomfort distChannelL;
 Discomfort distChannelR;
 
-float foldGainPotInput = 0;
-float shaperGainPotInput = 0;
-float tiltPotInput = 0;
-float dryWetPotInput = 0;
+float pot1 = 0;
+float pot2 = 0;
+float pot3 = 0;
+float pot4 = 0;
 
-#define FOLDER_MAX_GAIN 50
-#define SHAPER_MAX_GAIN 20
-
-float mapFFFF(float x, float in_min, float in_max, float out_min, float out_max) {
-	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
+float cv1 = 0;
+float cv2 = 0;
+float cv3 = 0;
+float cv4 = 0;
 
 void readAllAdcInputs() {
-	foldGainPotInput = hw.GetAdcValue(CV_1);
-	shaperGainPotInput = hw.GetAdcValue(CV_2);
-	tiltPotInput = hw.GetAdcValue(CV_3);
-	dryWetPotInput = hw.GetAdcValue(CV_4);
+	pot1 = hw.GetAdcValue(CV_1);
+	pot2 = hw.GetAdcValue(CV_2);
+	pot3 = hw.GetAdcValue(CV_3);
+	pot4 = hw.GetAdcValue(CV_4);
+
+	cv1 = hw.GetAdcValue(CV_5);
+	cv2 = hw.GetAdcValue(CV_6);
+	cv3 = hw.GetAdcValue(CV_7);
+	cv4 = hw.GetAdcValue(CV_8);
+}
+
+float process(float input, Discomfort *ch) {
+	return ch->process(
+		input,
+		1,
+		1,
+
+		1, // map(foldGainPotInput, 0, 1, 1, FOLDER_MAX_GAIN),
+		0,
+
+		1, // map(shaperGainPotInput, 0, 1, 1, CLIPPER_MAX_GAIN),
+		CLIPPER_SOFT,
+
+		0,
+
+		0,
+		0,
+		0, // map(tiltPotInput, 0, 1, 0, 1),
+
+		FILTERBANK_ON,
+		0,
+		0,
+		0,
+		0,
+
+		1
+	);
 }
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
 	hw.ProcessAllControls();
-	for (size_t i = 0; i < size; i++)
-	{
-		OUT_L[i] = distChannelL.process(
-			IN_L[i],
-			mapFFFF(foldGainPotInput, 0, 1, 1, FOLDER_MAX_GAIN),
-			mapFFFF(shaperGainPotInput, 0, 1, 1, SHAPER_MAX_GAIN),
-			tiltPotInput,
-			mapFFFF(dryWetPotInput, 0, 1, 0, 1)
-		);
-
-		OUT_R[i] = distChannelR.process(
-			IN_R[i],
-			mapFFFF(foldGainPotInput, 0, 1, 1, FOLDER_MAX_GAIN),
-			mapFFFF(shaperGainPotInput, 0, 1, 1, SHAPER_MAX_GAIN),
-			tiltPotInput,
-			dryWetPotInput
-		);
+	for (size_t i = 0; i < size; i++) {
+		OUT_L[i] = process(IN_L[i], &distChannelL);
+		OUT_R[i] = process(IN_R[i], &distChannelR);
 	}
 }
 
@@ -58,7 +79,12 @@ int main(void)
 {
 	hw.Init();
 	hw.SetAudioBlockSize(2); // number of samples handled per callback
-	hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
+	hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_96KHZ);
+	sampleRate = hw.AudioSampleRate();
+
+	distChannelL.init(sampleRate);
+	distChannelR.init(sampleRate);
+
 	hw.StartAudio(AudioCallback);
 	while(1) {
 		readAllAdcInputs();

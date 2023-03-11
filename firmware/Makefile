@@ -1,13 +1,23 @@
 # Project Name
 TARGET = firmware
 
-# Sources
 CPP_SOURCES = firmware.cpp
-CPP_SOURCES += Discomfort.cpp
-CPP_SOURCES += Folder.cpp
-CPP_SOURCES += Shaper.cpp
-CPP_SOURCES += DryWet.cpp
 
+# Sources
+CPP_SOURCES += src/Discomfort.cpp
+CPP_SOURCES += src/Folder.cpp
+CPP_SOURCES += src/Clipper.cpp
+CPP_SOURCES += src/DryWet.cpp
+CPP_SOURCES += src/Follower.cpp
+CPP_SOURCES += src/Crush.cpp
+CPP_SOURCES += src/FilterBank.cpp
+
+# testDiscomfort:
+# 	g++ test/test.cpp $(DISCOMFORT_CPP_SOURCES)
+# 	./a.out
+# 	rm a.out
+
+# CPP_SOURCES += $(DISCOMFORT_CPP_SOURCES)
 # Library Locations
 LIBDAISY_DIR = ../../DaisyExamples/libDaisy/
 DAISYSP_DIR = ../../DaisyExamples/DaisySP/
