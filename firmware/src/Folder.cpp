@@ -5,7 +5,7 @@ float Folder::fold(float input, float gain, float offset) {
   float sign = 1;
   if(input < 0) {
     sign = -1;
-    input = input * -1;
+    input = abs(input);
   }
 
   float newInput = input * gain;

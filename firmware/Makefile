@@ -12,8 +12,9 @@ CPP_SOURCES += src/Follower.cpp
 CPP_SOURCES += src/Crush.cpp
 CPP_SOURCES += src/FilterBank.cpp
 
+## UNCOMMENT TO TEST
 # testDiscomfort:
-# 	g++ test/test.cpp $(DISCOMFORT_CPP_SOURCES)
+# 	g++ test/test.cpp src/Folder.cpp
 # 	./a.out
 # 	rm a.out
 

@@ -11,14 +11,14 @@ bool checkFloat(float x, float y, float epsilon = 0.000001f){
 }
 
 void testFolder() {
-  assert(checkFloat(Folder::fold(1, 1.1), 0.9f));
-  assert(checkFloat(Folder::fold(1, 2), 0));
-  assert(checkFloat(Folder::fold(1, 2.1), -0.1));
-  assert(checkFloat(Folder::fold(1, 3), -1));
-  assert(checkFloat(Folder::fold(1, 3.1f), -0.9f));
-  assert(checkFloat(Folder::fold(1, 4.1f), 0.1f));
-  assert(checkFloat(Folder::fold(1, 5.1f), 0.9f));
-  assert(checkFloat(Folder::fold(1, 6.0f), 0.0f));
+  assert(checkFloat(Folder::fold(1, 1.1, 0), 0.9f));
+  assert(checkFloat(Folder::fold(1, 2, 0), 0));
+  assert(checkFloat(Folder::fold(1, 2.1, 0), -0.1));
+  assert(checkFloat(Folder::fold(1, 3, 0), -1));
+  assert(checkFloat(Folder::fold(1, 3.1f, 0), -0.9f));
+  assert(checkFloat(Folder::fold(1, 4.1f, 0), 0.1f));
+  assert(checkFloat(Folder::fold(1, 5.1f, 0), 0.9f));
+  assert(checkFloat(Folder::fold(1, 6.0f, 0), 0.0f));
 }
 
 void testCrusher(void) {
