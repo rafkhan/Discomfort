@@ -7,9 +7,11 @@ using namespace daisysp;
 FilterBankBand::FilterBankBand(float sampleRate, float lowFreq, float highFreq) {
   lowPass.Init(sampleRate);
   lowPass.SetFreq(lowFreq);
+  lowPass.SetRes(0.5);
 
   highPass.Init(sampleRate);
   highPass.SetFreq(highFreq);
+  highPass.SetRes(0.5);
 }
 
 float FilterBankBand::process(float input, float level) {
@@ -36,7 +38,14 @@ FilterBank::FilterBank(float sampleRate) {
   bandD = new FilterBankBand(sampleRate, 10000, 25000);
 }
 
-float FilterBank::process(float input, FilterBankType type, float levelA, float levelB, float levelC, float levelD) {
+float FilterBank::process(
+  float input,
+  FilterBankType type,
+  float levelA,
+  float levelB,
+  float levelC,
+  float levelD
+) {
   float outA = bandA->process(input, levelA);
   float outB = bandB->process(input, levelB);
   float outC = bandC->process(input, levelC);

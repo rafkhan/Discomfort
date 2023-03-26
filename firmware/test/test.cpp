@@ -5,9 +5,11 @@
 #include "../src/Folder.h"
 
 bool checkFloat(float x, float y, float epsilon = 0.000001f){
-   if(fabs(x - y) < epsilon)
-      return true; //they are same
-      return false; //they are not same
+  if(fabs(x - y) < epsilon) {
+    return true;
+  }
+
+  return false;
 }
 
 void testFolder() {

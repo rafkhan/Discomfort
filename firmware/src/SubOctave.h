@@ -7,7 +7,7 @@ using namespace daisysp;
 class SubOctave {
 public:
   SubOctave(float sampleRate);
-  float play(float input, float tone);
+  float process(float input, float tone);
 private:
   Oscillator osc;
 };
