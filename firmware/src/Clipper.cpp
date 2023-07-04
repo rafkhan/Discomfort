@@ -13,12 +13,12 @@ float Clipper::clip(float input, float gain, ClipperType type) {
   }
 
   // Hard clip
-  if (y > 1.0f) {
-    return 1.0f;
+  if (y > 0.9f) {
+    return 0.9f;
   }
 
-  if (y < -1.0f) {
-    return -1.0f;
+  if (y < -0.9f) {
+    return -0.9f;
   }
 
   return y;

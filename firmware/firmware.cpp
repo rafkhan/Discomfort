@@ -5,6 +5,7 @@
 #include "src/util.h"
 #include "src/Clipper.h"
 #include "src/Folder.h"
+#include "src/FilterBank.h"
 
 using namespace daisy;
 using namespace patch_sm;
@@ -48,14 +49,14 @@ DiscomfortInput GET_DEFAULT_INPUT(float input)
   dcInput.foldGain = FOLDER_MIN_GAIN;
   dcInput.foldOffset = 0;
   dcInput.foldSymmetry = 0;
-  dcInput.clipperGain = 0;
+  dcInput.clipperGain = CLIPPER_MIN_GAIN;
   dcInput.clipperType = CLIPPER_SOFT;
   dcInput.crushValue = 0;
-  dcInput.attack = 1; // ms
-  dcInput.decay = 50; // ms
-  dcInput.noiseVolume = 0.5;
+  dcInput.attack = 1;
+  dcInput.decay = 50;
+  dcInput.noiseVolume = 0;
   dcInput.noiseTone = 0;
-  dcInput.filterBankType = FILTERBANK_ON;
+  dcInput.filterBankType = FILTERBANK_OFF;
   dcInput.filterBandA = 0.75;
   dcInput.filterBandB = 0.75;
   dcInput.filterBandC = 0.75;
@@ -67,10 +68,10 @@ DiscomfortInput GET_DEFAULT_INPUT(float input)
 
 float process(float input, Discomfort *ch)
 {
-  cv1 = std::clamp(cv1, 0.0f, 1.0f);
-  cv2 = std::clamp(cv2, 0.0f, 1.0f);
-  cv3 = std::clamp(cv3, 0.0f, 1.0f);
-  cv4 = std::clamp(cv4, 0.0f, 1.0f);
+  cv1 = fclamp(cv1, 0.0f, 1.0f);
+  cv2 = fclamp(cv2, 0.0f, 1.0f);
+  cv3 = fclamp(cv3, 0.0f, 1.0f);
+  cv4 = fclamp(cv4, 0.0f, 1.0f);
 
   DiscomfortInput inputStruct = GET_DEFAULT_INPUT(input);
 
@@ -79,9 +80,10 @@ float process(float input, Discomfort *ch)
   inputStruct.filterBandB = pot2;
   inputStruct.filterBandC = pot3;
   inputStruct.filterBandD = pot4;
+  inputStruct.filterBankType = FILTERBANK_ON;
 
   inputStruct.dryWet = cv1;
-  inputStruct.foldGain = cv2;
+  inputStruct.foldGain = map(cv2, 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN);
   inputStruct.noiseVolume = cv3;
   inputStruct.clipperGain = cv4;
 
@@ -101,7 +103,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 int main(void)
 {
   hw.Init();
-  hw.SetAudioBlockSize(32);
+  hw.SetAudioBlockSize(128);
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_96KHZ);
   sampleRate = hw.AudioSampleRate();
 

@@ -6,7 +6,7 @@
 
 class Folder {
   public:
-    static float fold(float input, float gain, float offset);
+    static float fold(float input, float gain, float offset, float symmetry);
 };
 
 #endif

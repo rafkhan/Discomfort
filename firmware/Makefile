@@ -11,6 +11,7 @@ CPP_SOURCES += src/DryWet.cpp
 CPP_SOURCES += src/Follower.cpp
 CPP_SOURCES += src/Crush.cpp
 CPP_SOURCES += src/FilterBank.cpp
+CPP_SOURCES += src/util.cpp
 
 ## UNCOMMENT TO TEST
 # testDiscomfort:

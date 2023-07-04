@@ -1,7 +1,7 @@
 #include <cmath>
 #include "Folder.h"
 
-float Folder::fold(float input, float gain, float offset) {
+float Folder::fold(float input, float gain, float offset, float symmetry) {
   float sign = 1;
   if(input < 0) {
     sign = -1;
