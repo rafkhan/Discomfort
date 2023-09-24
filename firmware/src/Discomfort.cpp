@@ -2,6 +2,7 @@
 #include "Folder.h"
 #include "Clipper.h"
 #include "DryWet.h"
+#include "DiscomfortInput.h"
 
 Discomfort::Discomfort() {}
 
@@ -11,12 +12,10 @@ void Discomfort::init(float sampleRate) {
   noise.Init();
 }
 
-float Discomfort::process(DiscomfortInput input) {
+DiscomfortOutput Discomfort::process(DiscomfortInput input) {
   float gainStagedInput = input.input * input.inputGain;
 
-
-
-  float foldOut = Folder::fold(gainStagedInput, input.foldGain, input.foldOffset);
+  float foldOut = Folder::fold(gainStagedInput, input.foldGain, input.foldOffset, input.foldSymmetry);
   float clippedOut = Clipper::clip(foldOut, input.clipperGain, input.clipperType);
 
   float followerAmplitude = this->follower->process(input.input, input.attack, input.decay);
@@ -33,5 +32,14 @@ float Discomfort::process(DiscomfortInput input) {
     input.filterBandD
   );
 
-  return DryWet::blend(gainStagedInput, eqMix, input.dryWet);
+  float finalAudioOut = DryWet::blend(gainStagedInput, eqMix, input.dryWet);
+
+  return this->createOutput(finalAudioOut, followerAmplitude);
+}
+
+DiscomfortOutput Discomfort::createOutput(float audio, float follower) {
+  DiscomfortOutput dcOutput;
+  dcOutput.audioOutput = audio;
+  dcOutput.followerOutput = follower;
+  return dcOutput;
 }

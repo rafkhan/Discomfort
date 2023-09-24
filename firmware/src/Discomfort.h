@@ -5,47 +5,21 @@
 #include "Follower.h"
 #include "Clipper.h"
 #include "FilterBank.h"
+#include "DiscomfortInput.h"
 
 using namespace daisysp;
 
-struct DiscomfortInput {
-  float input;
-  float inputGain;
-  float outputGain;
-
-  // wavefloder
-  float foldGain;
-  float foldOffset;
-  float foldSymmetry;
-
-  // Clipper
-  float       clipperGain;
-  ClipperType clipperType;
-
-  // Crush
-  float crushValue;
-
-  // Follower
-  float attack;
-  float decay;
-  float noiseVolume;
-  float noiseTone;
-
-  // Filter bank
-  FilterBankType filterBankType;
-  float          filterBandA;
-  float          filterBandB;
-  float          filterBandC;
-  float          filterBandD;
-
-  float dryWet;
+struct DiscomfortOutput {
+  float audioOutput;
+  float followerOutput;
 };
 
 class Discomfort {
   public:
     Discomfort();
     void init(float sampleRate);
-    float process(DiscomfortInput input);
+    DiscomfortOutput process(DiscomfortInput input);
+    static DiscomfortOutput createOutput(float audio, float follower);
   private:
     Follower *follower;
     FilterBank *filterBank;
