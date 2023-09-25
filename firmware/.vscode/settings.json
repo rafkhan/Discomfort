@@ -5,6 +5,17 @@
     "type_traits": "cpp",
     "iostream": "cpp",
     "cmath": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "optional": "cpp",
+    "istream": "cpp",
+    "ostream": "cpp",
+    "ratio": "cpp",
+    "system_error": "cpp",
+    "array": "cpp",
+    "functional": "cpp",
+    "tuple": "cpp",
+    "utility": "cpp",
+    "variant": "cpp",
+    "chrono": "cpp"
   }
 }

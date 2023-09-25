@@ -12,6 +12,8 @@ using namespace daisy;
 using namespace patch_sm;
 using namespace daisysp;
 
+Switch button;
+
 float sampleRate;
 DaisyPatchSM hw;
 
@@ -20,8 +22,6 @@ Discomfort distChannelR;
 
 PageBank pageEnvFollower;
 PageBank pageFolder;
-
-
 PageBank pageClipper;
 
 // temp shit
@@ -33,6 +33,18 @@ float cv2 = 0;
 float cv3 = 0;
 float cv4 = 0;
 
+
+PageBank *banks[] = { &pageFolder, &pageClipper };
+int buttonState = 0;
+int maxButton = 1;
+void onButtonPress() {
+  banks[buttonState]->lockPage();
+  buttonState++;
+  if (buttonState > maxButton) {
+    buttonState = 0;
+  }
+}
+
 void readAllAdcInputs()
 {
   pot4 = hw.GetAdcValue(CV_4);
@@ -40,68 +52,48 @@ void readAllAdcInputs()
   cv2 = hw.GetAdcValue(CV_6);
   cv3 = hw.GetAdcValue(CV_7);
   cv4 = hw.GetAdcValue(CV_8);
-  
-  pageEnvFollower.updatePage(
-    hw.GetAdcValue(CV_1),
-    hw.GetAdcValue(CV_2),
-    hw.GetAdcValue(CV_3),
-    pot4,
-    hw.GetAdcValue(CV_5),
-    hw.GetAdcValue(CV_6),
-    hw.GetAdcValue(CV_7),
-    hw.GetAdcValue(CV_8)
-  );
 
-  pageFolder.updatePage(
-    hw.GetAdcValue(CV_1),
-    hw.GetAdcValue(CV_2),
-    hw.GetAdcValue(CV_3),
-    pot4,
-    hw.GetAdcValue(CV_5),
-    hw.GetAdcValue(CV_6),
-    hw.GetAdcValue(CV_7),
-    hw.GetAdcValue(CV_8)
-  );
+  hw.WriteCvOut(2, 5.f * buttonState);
 
-  pageClipper.updatePage(
+  banks[buttonState]->updatePage(
     hw.GetAdcValue(CV_1),
     hw.GetAdcValue(CV_2),
     hw.GetAdcValue(CV_3),
     pot4,
-    hw.GetAdcValue(CV_5),
-    hw.GetAdcValue(CV_6),
-    hw.GetAdcValue(CV_7),
-    hw.GetAdcValue(CV_8)
+    cv1,
+    cv2,
+    cv3,
+    cv4
   );
+  // if(buttonState == 1) {
+  //   pageClipper.updatePage(
+  //     hw.GetAdcValue(CV_1),
+  //     hw.GetAdcValue(CV_2),
+  //     hw.GetAdcValue(CV_3),
+  //     pot4,
+  //     cv1,
+  //     cv2,
+  //     cv3,
+  //     cv4
+  //   );
+  // }
 }
 
 DiscomfortOutput process(float audioIn, Discomfort *ch) {
   DiscomfortInput inputStruct = DiscomfortInput::create(audioIn);
 
-  // inputStruct.setFolderValues(
-  //   fclamp(pageFolder.pot1 + cv1, 0, 1),
-  //   fclamp(pageFolder.pot2 + cv2, -1, 1),
-  //   fclamp(pageFolder.pot3 + cv3, -1, 1)
-  // );
+  inputStruct.setFolderValues(
+    fclamp(pageFolder.pot1.getValue() + cv1, 0, 1),
+    fclamp(pageFolder.pot2.getValue() + cv2, -1, 1),
+    fclamp(pageFolder.pot3.getValue() + cv3, -1, 1)
+  );
 
   inputStruct.setClipperValues(
-    fclamp(pageClipper.pot1 + cv1, 0, 1),
-    fclamp(pageClipper.pot2 + cv2, 0, 1)
+    fclamp(pageClipper.pot1.getValue(), 0, 1),
+    fclamp(pageClipper.pot2.getValue(), 0, 1)
   );
 
   inputStruct.dryWet = pot4;
-
-  // // // TODO multiplexers on these mfs
-  // // inputStruct.filterBandA = pot1;
-  // // inputStruct.filterBandB = pot2;
-  // // inputStruct.filterBandC = pot3;
-  // // inputStruct.filterBandD = pot4;
-  // // inputStruct.filterBankType = FILTERBANK_ON;
-
-  // // inputStruct.dryWet = cv1;
-  // // inputStruct.foldGain = map(cv2, 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN);
-  // // inputStruct.noiseVolume = cv3;
-  // // inputStruct.clipperGain = cv4;
 
   return ch->process(inputStruct);
 }
@@ -109,6 +101,12 @@ DiscomfortOutput process(float audioIn, Discomfort *ch) {
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
   hw.ProcessAllControls();
+  button.Debounce();
+
+  if (button.RisingEdge()) {
+      onButtonPress();
+  }
+
   for (size_t i = 0; i < size; i++)
   {
     DiscomfortOutput outputStructL = process(IN_L[i], &distChannelL);
@@ -119,14 +117,18 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
 int main(void)
 {
-  pageFolder.pot2 = 0.5;
-  pageFolder.pot3 = 0.5;
-  pageFolder.cv1 = 0.5;
+  pageFolder.pot2.setValue(0.5);
+  pageFolder.pot3.setValue(0.5);
+
+  pageClipper.pot1.setValue(0);
+  pageClipper.pot2.setValue(0);
 
   hw.Init();
   hw.SetAudioBlockSize(8);
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_96KHZ);
   sampleRate = hw.AudioSampleRate();
+
+  button.Init(hw.B7);
 
   distChannelL.init(sampleRate);
   distChannelR.init(sampleRate);
@@ -136,6 +138,7 @@ int main(void)
   osc.SetWaveform(osc.WAVE_SIN);
   osc.SetAmp(1.f);
   osc.SetFreq(1000);
+
 
   hw.StartAudio(AudioCallback);
 
