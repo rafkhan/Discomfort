@@ -5,6 +5,7 @@
 #include "Folder.h"
 #include "Clipper.h"
 #include "FilterBank.h"
+#include "util.h"
 
 class DiscomfortInput {
   public:
@@ -34,21 +35,22 @@ class DiscomfortInput {
     FilterBankType filterBankType;
     float          filterBandA;
     float          filterBandB;
+
+    
     float          filterBandC;
     float          filterBandD;
 
     float dryWet;
 
     void setFolderValues(float gain, float offset, float symmetry) {
-      this->foldGain = gain;
-      this->foldOffset = offset;
-      this->foldSymmetry = symmetry;
+      this->foldGain = map(gain, 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN);
+      this->foldOffset = map(offset, 0, 1, FOLDER_MIN_OFFSET, FOLDER_MAX_OFFSET); 
+      this->foldSymmetry = map(symmetry, 0, 1, FOLDER_MIN_SYMMETRY, FOLDER_MAX_SYMMETRY);
     }
 
     void setClipperValue(float gain) {
       this->clipperGain = gain;
     }
-
 
     static DiscomfortInput create(float audioInput) {
       DiscomfortInput dcInput;

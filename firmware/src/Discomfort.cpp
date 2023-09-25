@@ -23,16 +23,16 @@ DiscomfortOutput Discomfort::process(DiscomfortInput input) {
 
   float mix = (clippedOut + noiseValue) * input.outputGain;
 
-  float eqMix = filterBank->process(
-    mix,
-    input.filterBankType,
-    input.filterBandA,
-    input.filterBandB,
-    input.filterBandC,  
-    input.filterBandD
-  );
+  // float eqMix = filterBank->process(
+  //   mix,
+  //   input.filterBankType,
+  //   input.filterBandA,
+  //   input.filterBandB,
+  //   input.filterBandC,  
+  //   input.filterBandD
+  // );
 
-  float finalAudioOut = DryWet::blend(gainStagedInput, eqMix, input.dryWet);
+  float finalAudioOut = DryWet::blend(gainStagedInput, mix, input.dryWet);
 
   return this->createOutput(finalAudioOut, followerAmplitude);
 }

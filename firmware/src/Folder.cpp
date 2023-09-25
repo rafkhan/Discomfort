@@ -3,12 +3,21 @@
 
 float Folder::fold(float input, float gain, float offset, float symmetry) {
   float sign = 1;
+  input -= offset;
   if(input < 0) {
     sign = -1;
     input = abs(input);
   }
 
-  float newInput = input * gain;
+  float newInput;
+  float s = 2;
+  if (symmetry >= 0 && sign == 1) {
+    gain = gain * s * abs(symmetry);
+  } else if(symmetry < 0 && sign == 1) {
+    gain = gain * s * abs(symmetry);
+  }
+
+  newInput = input * gain;
 
   // input * gain does not exceed folding threshold
   // no need to compute anything further 
@@ -26,6 +35,8 @@ float Folder::fold(float input, float gain, float offset, float symmetry) {
   } else {
     foldValue = 1 - (newInput - sub);
   }
+
+
 
   return foldValue * sign;
 }
