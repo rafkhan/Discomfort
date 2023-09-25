@@ -11,10 +11,11 @@ float Folder::fold(float input, float gain, float offset, float symmetry) {
 
   float newInput;
   float s = 2;
-  if (symmetry >= 0 && sign == 1) {
-    gain = gain * s * abs(symmetry);
-  } else if(symmetry < 0 && sign == 1) {
-    gain = gain * s * abs(symmetry);
+  float z = s * abs(symmetry);
+  if (symmetry > 0 && sign == 1) {
+    gain = gain * (1 + abs(symmetry));
+  } else if(symmetry < 0 && sign == -1) {
+    gain = gain * (1 + abs(symmetry));
   }
 
   newInput = input * gain;
@@ -35,8 +36,6 @@ float Folder::fold(float input, float gain, float offset, float symmetry) {
   } else {
     foldValue = 1 - (newInput - sub);
   }
-
-
 
   return foldValue * sign;
 }

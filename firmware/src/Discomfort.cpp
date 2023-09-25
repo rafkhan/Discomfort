@@ -15,8 +15,8 @@ void Discomfort::init(float sampleRate) {
 DiscomfortOutput Discomfort::process(DiscomfortInput input) {
   float gainStagedInput = input.input * input.inputGain;
 
-  float foldOut = Folder::fold(gainStagedInput, input.foldGain, input.foldOffset, input.foldSymmetry);
-  float clippedOut = Clipper::clip(foldOut, input.clipperGain, input.clipperType);
+  // float foldOut = Folder::fold(gainStagedInput, input.foldGain, input.foldOffset, input.foldSymmetry);
+  float clippedOut = Clipper::clip(gainStagedInput, input.clipperGain, input.clipperBend);
 
   float followerAmplitude = this->follower->process(input.input, input.attack, input.decay);
   float noiseValue = noise.Process() * followerAmplitude * input.noiseVolume;
@@ -32,7 +32,7 @@ DiscomfortOutput Discomfort::process(DiscomfortInput input) {
   //   input.filterBandD
   // );
 
-  float finalAudioOut = DryWet::blend(gainStagedInput, mix, input.dryWet);
+  float finalAudioOut = DryWet::blend(gainStagedInput, mix, input.dryWet) * 0.8;
 
   return this->createOutput(finalAudioOut, followerAmplitude);
 }

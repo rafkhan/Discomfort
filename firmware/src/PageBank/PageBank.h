@@ -3,6 +3,7 @@
 
 class PageBank {
   public:
+    PageBank();
     float pot1 = 0;
     float pot2 = 0;
     float pot3 = 0;

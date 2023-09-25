@@ -20,6 +20,7 @@ class DiscomfortInput {
 
     // Clipper
     float       clipperGain;
+    float       clipperBend;
     ClipperType clipperType;
 
     // Crush
@@ -36,7 +37,7 @@ class DiscomfortInput {
     float          filterBandA;
     float          filterBandB;
 
-    
+
     float          filterBandC;
     float          filterBandD;
 
@@ -48,8 +49,9 @@ class DiscomfortInput {
       this->foldSymmetry = map(symmetry, 0, 1, FOLDER_MIN_SYMMETRY, FOLDER_MAX_SYMMETRY);
     }
 
-    void setClipperValue(float gain) {
-      this->clipperGain = gain;
+    void setClipperValues(float gain, float bend) {
+      this->clipperGain = map(gain, 0, 1, CLIPPER_MIN_GAIN, CLIPPER_MAX_GAIN);
+      this->clipperBend = map(bend, 0, 1, CLIPPER_MIN_BEND, CLIPPER_MAX_BEND);
     }
 
     static DiscomfortInput create(float audioInput) {
@@ -61,6 +63,7 @@ class DiscomfortInput {
       dcInput.foldOffset = 0;
       dcInput.foldSymmetry = 0;
       dcInput.clipperGain = CLIPPER_MIN_GAIN;
+      dcInput.clipperBend = 0;
       dcInput.clipperType = CLIPPER_SOFT;
       dcInput.crushValue = 0;
       dcInput.attack = 1;

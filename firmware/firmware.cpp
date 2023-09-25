@@ -21,6 +21,9 @@ Discomfort distChannelR;
 PageBank pageEnvFollower;
 PageBank pageFolder;
 
+
+PageBank pageClipper;
+
 // temp shit
 Oscillator osc;
 
@@ -59,21 +62,33 @@ void readAllAdcInputs()
     hw.GetAdcValue(CV_7),
     hw.GetAdcValue(CV_8)
   );
+
+  pageClipper.updatePage(
+    hw.GetAdcValue(CV_1),
+    hw.GetAdcValue(CV_2),
+    hw.GetAdcValue(CV_3),
+    pot4,
+    hw.GetAdcValue(CV_5),
+    hw.GetAdcValue(CV_6),
+    hw.GetAdcValue(CV_7),
+    hw.GetAdcValue(CV_8)
+  );
 }
 
-float process(float audioIn, Discomfort *ch)
-{
-  // // cv1 = fclamp(cv1, 0.0f, 1.0f);
-  // // cv2 = fclamp(cv2, 0.0f, 1.0f);
-  // // cv3 = fclamp(cv3, 0.0f, 1.0f);
-  // // cv4 = fclamp(cv4, 0.0f, 1.0f);
-
+DiscomfortOutput process(float audioIn, Discomfort *ch) {
   DiscomfortInput inputStruct = DiscomfortInput::create(audioIn);
-  inputStruct.setFolderValues(
-    fclamp(pageFolder.pot1 + cv1, 0, 1),
-    fclamp(pageFolder.pot2 + cv2, -1, 1),
-    fclamp(pageFolder.pot3 + cv3, -1, 1)
+
+  // inputStruct.setFolderValues(
+  //   fclamp(pageFolder.pot1 + cv1, 0, 1),
+  //   fclamp(pageFolder.pot2 + cv2, -1, 1),
+  //   fclamp(pageFolder.pot3 + cv3, -1, 1)
+  // );
+
+  inputStruct.setClipperValues(
+    fclamp(pageClipper.pot1 + cv1, 0, 1),
+    fclamp(pageClipper.pot2 + cv2, 0, 1)
   );
+
   inputStruct.dryWet = pot4;
 
   // // // TODO multiplexers on these mfs
@@ -88,8 +103,7 @@ float process(float audioIn, Discomfort *ch)
   // // inputStruct.noiseVolume = cv3;
   // // inputStruct.clipperGain = cv4;
 
-  DiscomfortOutput channelOutput = ch->process(inputStruct);
-  return channelOutput.audioOutput;
+  return ch->process(inputStruct);
 }
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
@@ -97,13 +111,18 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   hw.ProcessAllControls();
   for (size_t i = 0; i < size; i++)
   {
-    OUT_L[i] = process(IN_L[i], &distChannelL);
-    OUT_R[i] = process(IN_R[i], &distChannelR);
+    DiscomfortOutput outputStructL = process(IN_L[i], &distChannelL);
+    OUT_L[i] = outputStructL.audioOutput;
+    OUT_R[i] = process(IN_R[i], &distChannelR).audioOutput;
   }
 }
 
 int main(void)
 {
+  pageFolder.pot2 = 0.5;
+  pageFolder.pot3 = 0.5;
+  pageFolder.cv1 = 0.5;
+
   hw.Init();
   hw.SetAudioBlockSize(8);
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_96KHZ);
