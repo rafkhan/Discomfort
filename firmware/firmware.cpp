@@ -53,7 +53,7 @@ void readAllAdcInputs()
   cv3 = hw.GetAdcValue(CV_7);
   cv4 = hw.GetAdcValue(CV_8);
 
-  hw.WriteCvOut(2, 5.f * buttonState);
+  // hw.WriteCvOut(2, 5.f * buttonState);
 
   banks[buttonState]->updatePage(
     hw.GetAdcValue(CV_1),
@@ -65,18 +65,6 @@ void readAllAdcInputs()
     cv3,
     cv4
   );
-  // if(buttonState == 1) {
-  //   pageClipper.updatePage(
-  //     hw.GetAdcValue(CV_1),
-  //     hw.GetAdcValue(CV_2),
-  //     hw.GetAdcValue(CV_3),
-  //     pot4,
-  //     cv1,
-  //     cv2,
-  //     cv3,
-  //     cv4
-  //   );
-  // }
 }
 
 DiscomfortOutput process(float audioIn, Discomfort *ch) {
@@ -110,6 +98,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   for (size_t i = 0; i < size; i++)
   {
     DiscomfortOutput outputStructL = process(IN_L[i], &distChannelL);
+    hw.WriteCvOut(1, 5.f * outputStructL.followerOutput);
+    hw.WriteCvOut(2, 5.f * outputStructL.followerOutput);
     OUT_L[i] = outputStructL.audioOutput;
     OUT_R[i] = process(IN_R[i], &distChannelR).audioOutput;
   }
