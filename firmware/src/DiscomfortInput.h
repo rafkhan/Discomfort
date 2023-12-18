@@ -75,7 +75,7 @@ class DiscomfortInput {
       dcInput.filterBandB = 0.75;
       dcInput.filterBandC = 0.75;
       dcInput.filterBandD = 0.75;
-      dcInput.dryWet = 1;
+      dcInput.dryWet = 0;
 
       return dcInput;
     }
