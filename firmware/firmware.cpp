@@ -6,13 +6,13 @@
 #include "src/Clipper.h"
 #include "src/Folder.h"
 #include "src/FilterBank.h"
-#include "src/PageBank/PageBank.h"
+
+#include "src/hardware/mux.h"
+#include "src/hardware/discomfortHwInputs.h"
 
 using namespace daisy;
 using namespace patch_sm;
 using namespace daisysp;
-
-Switch button;
 
 float sampleRate;
 DaisyPatchSM hw;
@@ -20,81 +20,38 @@ DaisyPatchSM hw;
 Discomfort distChannelL;
 Discomfort distChannelR;
 
-PageBank pageEnvFollower;
-PageBank pageFolder;
-PageBank pageClipper;
+// Can move into mux class probably
+dsy_gpio muxSelect0;
+dsy_gpio muxSelect1;
+dsy_gpio muxSelect2;
 
-float pot4 = 0;
-float cv1 = 0;
-float cv2 = 0;
-float cv3 = 0;
-float cv4 = 0;
+Mux mux0;
+Mux mux1;
+Mux mux2;
+Mux *muxes[3] = {&mux0, &mux1, &mux2};
 
-PageBank *banks[] = { &pageFolder, &pageClipper };
-int buttonState = 0;
-int maxButton = 1;
-void onButtonPress() {
-  banks[buttonState]->lockPage();
-  buttonState++;
-  if (buttonState > maxButton) {
-    buttonState = 0;
-  }
-}
-
-void readAllAdcInputs()
+void initAdc()
 {
-  // pot4 = hw.GetAdcValue(CV_4);
-  // cv1 = hw.GetAdcValue(CV_5);
-  // cv2 = hw.GetAdcValue(CV_6);
-  // cv3 = hw.GetAdcValue(CV_7);
-  // cv4 = hw.GetAdcValue(CV_8);
-
-  // // hw.WriteCvOut(2, 5.f * buttonState);
-
-  // banks[buttonState]->updatePage(
-  //   hw.GetAdcValue(CV_1),
-  //   hw.GetAdcValue(CV_2),
-  //   hw.GetAdcValue(CV_3),
-  //   pot4,
-  //   cv1,
-  //   cv2,
-  //   cv3,
-  //   cv4
-  // );
+  mux0.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, CV_8);
+  mux1.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, CV_7);
+  mux2.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, CV_6);
 }
 
-DiscomfortOutput process(float audioIn, Discomfort *ch) {
-  DiscomfortInput inputStruct = DiscomfortInput::create(audioIn);
-
-  // inputStruct.setFolderValues(
-  //   fclamp(pageFolder.pot1.getValue() + cv1, 0, 1),
-  //   fclamp(pageFolder.pot2.getValue() + cv2, -1, 1),
-  //   fclamp(pageFolder.pot3.getValue() + cv3, -1, 1)
-  // );
-
-  // inputStruct.setClipperValues(
-  //   fclamp(pageClipper.pot1.getValue(), 0, 1),
-  //   fclamp(pageClipper.pot2.getValue(), 0, 1)
-  // );
-
-  // inputStruct.dryWet = pot4;
-
+DiscomfortOutput process(float audioIn, DiscomfortHwInputs hwInputs, Discomfort *ch)
+{
+  DiscomfortInput inputStruct = DiscomfortInput::createFromHwInputs(audioIn, hwInputs);
   return ch->process(inputStruct);
 }
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
-  hw.ProcessAllControls();
-  // button.Debounce();
-
-  // if (button.RisingEdge()) {
-  //     onButtonPress();
-  // }
+  // hw.ProcessAllControls();
+  DiscomfortHwInputs inputs = getInputsFromHw(&hw, muxes);
 
   for (size_t i = 0; i < size; i++)
   {
-    DiscomfortOutput outputL = process(IN_L[i], &distChannelL);
-    DiscomfortOutput outputR = process(IN_L[i], &distChannelL);
+    DiscomfortOutput outputL = process(IN_L[i], inputs, &distChannelL);
+    DiscomfortOutput outputR = process(IN_L[i], inputs, &distChannelL);
     // hw.WriteCvOut(1, 5.f * outputStructL.followerOutput);
     // hw.WriteCvOut(2, 5.f * outputStructL.followerOutput);
     OUT_L[i] = outputL.audioOutput;
@@ -104,25 +61,23 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
 int main(void)
 {
-  // pageFolder.pot2.setValue(0.5);
-  // pageFolder.pot3.setValue(0.5);
-
-  // pageClipper.pot1.setValue(0);
-  // pageClipper.pot2.setValue(0);
-
   hw.Init();
+  hw.StartLog();
+
+  System::Delay(100);
+
   hw.SetAudioBlockSize(8);
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_96KHZ);
   sampleRate = hw.AudioSampleRate();
 
-  // button.Init(hw.B7);
+  initAdc();
 
   distChannelL.init(sampleRate);
   distChannelR.init(sampleRate);
 
   hw.StartAudio(AudioCallback);
 
-  while (1) {
-    readAllAdcInputs();
+  while (1)
+  {
   }
 }

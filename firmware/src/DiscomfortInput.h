@@ -6,6 +6,7 @@
 #include "Clipper.h"
 #include "FilterBank.h"
 #include "util.h"
+#include "hardware/discomfortHwInputs.h"
 
 class DiscomfortInput {
   public:
@@ -29,17 +30,7 @@ class DiscomfortInput {
     // Follower
     float attack;
     float decay;
-    float noiseVolume;
-    float noiseTone;
-
-    // Filter bank
-    FilterBankType filterBankType;
-    float          filterBandA;
-    float          filterBandB;
-
-
-    float          filterBandC;
-    float          filterBandD;
+    float envGain;
 
     float dryWet;
 
@@ -52,6 +43,25 @@ class DiscomfortInput {
     void setClipperValues(float gain, float bend) {
       this->clipperGain = map(gain, 0, 1, CLIPPER_MIN_GAIN, CLIPPER_MAX_GAIN);
       this->clipperBend = map(bend, 0, 1, CLIPPER_MIN_BEND, CLIPPER_MAX_BEND);
+    }
+
+    static DiscomfortInput createFromHwInputs(float audioInput, DiscomfortHwInputs hwInputs) {
+      DiscomfortInput dcInput;
+      dcInput.input = audioInput;
+      dcInput.inputGain = 1;
+      dcInput.outputGain = 1;
+      dcInput.foldGain = FOLDER_MIN_GAIN;
+      dcInput.foldOffset = 0;
+      dcInput.foldSymmetry = 0;
+      dcInput.clipperGain = CLIPPER_MIN_GAIN;
+      dcInput.clipperBend = 0;
+      dcInput.clipperType = CLIPPER_SOFT;
+      dcInput.crushValue = 0;
+      dcInput.attack = 1;
+      dcInput.decay = 50;
+      dcInput.envGain = 1;
+      dcInput.dryWet = 0;
+      return dcInput;
     }
 
     static DiscomfortInput create(float audioInput) {
@@ -68,13 +78,7 @@ class DiscomfortInput {
       dcInput.crushValue = 0;
       dcInput.attack = 1;
       dcInput.decay = 50;
-      dcInput.noiseVolume = 0;
-      dcInput.noiseTone = 0;
-      dcInput.filterBankType = FILTERBANK_OFF;
-      dcInput.filterBandA = 0.75;
-      dcInput.filterBandB = 0.75;
-      dcInput.filterBandC = 0.75;
-      dcInput.filterBandD = 0.75;
+      dcInput.envGain = 1;
       dcInput.dryWet = 0;
 
       return dcInput;

@@ -17,5 +17,9 @@
     "utility": "cpp",
     "variant": "cpp",
     "chrono": "cpp"
+  },
+  "files.exclude": {
+    "**/.vscode/*": true,
+    "**/build": true
   }
 }
