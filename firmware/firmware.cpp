@@ -39,13 +39,14 @@ void initAdc()
 
 DiscomfortOutput process(float audioIn, DiscomfortHwInputs hwInputs, Discomfort *ch)
 {
-  DiscomfortInput inputStruct = DiscomfortInput::createFromHwInputs(audioIn, hwInputs);
+  // optimize this please
+  DiscomfortInput inputStruct = createDiscomfortInputFromHwInputs(audioIn, hwInputs);
   return ch->process(inputStruct);
 }
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
-  // hw.ProcessAllControls();
+  // this should probably block and fuck things up???
   DiscomfortHwInputs inputs = getInputsFromHw(&hw, muxes);
 
   for (size_t i = 0; i < size; i++)
@@ -67,7 +68,7 @@ int main(void)
   System::Delay(100);
 
   hw.SetAudioBlockSize(8);
-  hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_96KHZ);
+  hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
   sampleRate = hw.AudioSampleRate();
 
   initAdc();

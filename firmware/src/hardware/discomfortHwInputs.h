@@ -41,8 +41,11 @@ struct DiscomfortHwInputs {
 };
 
 float GetMuxFloat(int muxId, int pin);
-DiscomfortHwInputs getInputsFromHw(DaisyPatchSM *hw, Mux **mux);
-DiscomfortInput create();
 
+DiscomfortHwInputs getInputsFromHw(DaisyPatchSM *hw, Mux **mux);
+DiscomfortInput createDiscomfortInputFromHwInputs(float audioInput, DiscomfortHwInputs hwInputs);
+
+float getScaledPotInput(float in);
+float getScaledCvInput(float in);
 
 #endif
