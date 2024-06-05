@@ -32,13 +32,15 @@ public:
   float decay;
   float envGain;
 
-  float dryWet;
+  float dryWetFold;
+  float dryWetClip;
 
-  void setFolderValues(float gain, float offset, float symmetry)
+  void setFolderValues(float gain, float offset, float symmetry, float dryWet)
   {
-    this->foldGain = map(pow(gain, 2), 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN);
+    this->foldGain = map(gain, 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN);
     this->foldOffset = map(offset, -1, 1, FOLDER_MIN_OFFSET, FOLDER_MAX_OFFSET);
     this->foldSymmetry = map(symmetry, -1, 1, FOLDER_MIN_SYMMETRY, FOLDER_MAX_SYMMETRY);
+    this->dryWetFold = dryWet;
   }
 
   void setClipperValues(float gain, float bend)
@@ -63,7 +65,8 @@ public:
     dcInput.attack = 1;
     dcInput.decay = 50;
     dcInput.envGain = 1;
-    dcInput.dryWet = 1;
+    dcInput.dryWetFold = 0;
+    dcInput.dryWetClip = 0;
 
     return dcInput;
   }

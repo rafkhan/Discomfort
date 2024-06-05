@@ -6,6 +6,7 @@
 #include "src/Clipper.h"
 #include "src/Folder.h"
 #include "src/FilterBank.h"
+#include "src/DryWet.h"
 
 #include "src/hardware/mux.h"
 #include "src/hardware/discomfortHwInputs.h"
@@ -31,6 +32,7 @@ Mux mux2;
 Mux *muxes[3] = {&mux0, &mux1, &mux2};
 // DiscomfortHwInputs inputs;
 DiscomfortHwInputs *hardwareInputs;
+int muxPinIdx = 0;
 
 void initAdc()
 {
@@ -51,14 +53,26 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 {
   for (size_t i = 0; i < size; i++)
   {
-    // DiscomfortOutput outputL = process(IN_L[i], hardwareInputs, &distChannelL);
+    DiscomfortOutput outputL = process(IN_L[i], hardwareInputs, &distChannelL);
     // DiscomfortOutput outputR = process(IN_R[i], hardwareInputs, &distChannelR);
-    // OUT_L[i] = outputL.audioOutput;
+    OUT_L[i] = outputL.audioOutput;
     // OUT_R[i] = outputR.audioOutput;
 
-    OUT_L[i] = Folder::fold(IN_L[i], map(hardwareInputs->foldAmountPot->getValue(), 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN), 0, 0) * 0.8;
-    OUT_R[i] = 0;
+    // float foldGain = map(fclamp(getScaledPotInput(hardwareInputs->foldAmountPot->getValue()) + getScaledCvInput(hardwareInputs->foldAmountCv->getValue()), 0, 1), 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN);
 
+    // // TEST WITH THIS FOR NOW
+    // float foldedAudio = Folder::fold(
+    //                IN_L[i],
+    //                map(getScaledPotInput(hardwareInputs->foldAmountPot->getValue()), 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN),
+    //                0,
+    //                0) *
+    //            0.8;
+
+    // float blend = DryWet::blend(IN_L[i], foldedAudio, pow(getScaledPotInput(hardwareInputs->foldSymmetryPot->getValue()), 3));
+    
+    // OUT_L[i] = blend;
+    OUT_R[i] = 0;
+ 
     // // hw.WriteCvOut(1, 5.f * outputStructL.followerOutput);
     // // hw.WriteCvOut(2, 5.f * outputStructL.followerOutput);
     // OUT_L[i] = IN_L[i];
@@ -73,7 +87,7 @@ int main(void)
 
   System::Delay(100);
 
-  hw.SetAudioBlockSize(4);
+  hw.SetAudioBlockSize(16);
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
   sampleRate = hw.AudioSampleRate();
 
@@ -84,13 +98,22 @@ int main(void)
 
   hw.StartAudio(AudioCallback);
   Mux *muxes[3] = {&mux0, &mux1, &mux2};
-	hardwareInputs = new DiscomfortHwInputs(&hw, muxes);
+  hardwareInputs = new DiscomfortHwInputs(&hw, muxes);
 
   while (1)
   {
     // this should probably block and fuck things up???
     // inputs = getInputsFromHw(&hw, muxes);
-    hardwareInputs->updateAll();
+    if (muxPinIdx % 8 == 0)
+    {
+      muxPinIdx = 0;
+    }
+    hardwareInputs->readMuxOnePin(muxPinIdx);
+    muxPinIdx++;
+
+    // hw.PrintLine();
+
+    // // hardwareInputs->updateAll();
     // hw.PrintLine(
     //   "(%d, %d): %f",
     //   hardwareInputs->foldAmountPot->muxIdx,

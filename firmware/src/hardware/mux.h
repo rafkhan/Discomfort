@@ -11,7 +11,8 @@ using namespace daisysp;
 class Mux {
   public:
     void init(dsy_gpio *s0, dsy_gpio *s1, dsy_gpio *s2, DaisyPatchSM *hw, int _cvIdx);
-    float getInput(uint8_t pin, bool writeSelectPin, DaisyPatchSM *hw);
+    float getInput(int pin, bool writeSelectPin, DaisyPatchSM *hw);
+    void setBits(int pin);
 
   private:
     dsy_gpio *s0, *s1, *s2;

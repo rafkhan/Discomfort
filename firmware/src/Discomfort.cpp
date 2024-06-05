@@ -20,14 +20,14 @@ DiscomfortOutput Discomfort::process(DiscomfortInput input)
   float gainStagedInput = input.input * input.inputGain;
 
   float foldOut = Folder::fold(gainStagedInput, input.foldGain, input.foldOffset, input.foldSymmetry) * 0.9;
+  float foldBlend = DryWet::blend(gainStagedInput, foldOut, pow(input.dryWetFold, 3));
   // output.audioOutput = foldOut;
   // output.followerOutput = 0;
   // float clippedOut = Clipper::clip(foldOut, input.clipperGain, input.clipperBend);
 
   // float followerAmplitude = this->follower->process(input.input, input.attack, input.decay);
 
-  // float finalAudioOut = DryWet::blend(gainStagedInput, clippedOut, pow(input.dryWet, 3)) * 0.75;
-  return this->createOutput(foldOut, 0);
+  return this->createOutput(foldBlend, 0);
 }
 
 DiscomfortOutput Discomfort::createOutput(float audio, float follower)

@@ -23,7 +23,8 @@ public:
   float raw;
   float value;
   float getValue();
-  void read(void);
+  void read(bool writePins);
+  void setMuxBits(int pin);
 
   int muxIdx;
   int muxPin;
@@ -36,9 +37,13 @@ private:
 class DiscomfortHwInputs
 {
 public:
-  DiscomfortHwInputs(DaisyPatchSM *hw, Mux **mux);
+  DiscomfortHwInputs(DaisyPatchSM *hw, Mux **_muxes);
   DiscomfortInput createDiscomfortInput(float audioIn);
   void updateAll(void);
+  void readMuxOnePin(int pin);
+
+  Mux **muxes;
+
 
   float inputGain;
   float outputGain;
@@ -51,8 +56,8 @@ public:
   float foldMixPot;
   float foldOffsetCv;
   float foldOffsetPot;
-  float foldSymmetryCv;
-  float foldSymmetryPot;
+  DiscomfortHwAnalogInput *foldSymmetryCv;
+  DiscomfortHwAnalogInput *foldSymmetryPot;
 
   DiscomfortHwAnalogInput *foldAmountCv;
   DiscomfortHwAnalogInput *foldAmountPot;

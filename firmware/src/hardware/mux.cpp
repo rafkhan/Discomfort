@@ -25,7 +25,7 @@ void Mux::setPinCfg(dsy_gpio *gpio, Pin pin) {
 	dsy_gpio_init(gpio); 
 }
 
-float Mux::getInput(uint8_t pin, bool writeSelectPins, DaisyPatchSM *hw) {
+float Mux::getInput(int pin, bool writeSelectPins, DaisyPatchSM *hw) {
   if(writeSelectPins) {
     dsy_gpio_write(s0, (bool) ((pin >> 0) & 1));
     dsy_gpio_write(s1, (bool) ((pin >> 1) & 1));
@@ -34,4 +34,10 @@ float Mux::getInput(uint8_t pin, bool writeSelectPins, DaisyPatchSM *hw) {
 
   hw->ProcessAnalogControls();
   return hw->GetAdcValue(this->cvIdx);
+}
+
+void Mux::setBits(int pin) {
+  dsy_gpio_write(s0, (bool) ((pin >> 0) & 1));
+  dsy_gpio_write(s1, (bool) ((pin >> 1) & 1));
+  dsy_gpio_write(s2, (bool) ((pin >> 2) & 1));
 }
