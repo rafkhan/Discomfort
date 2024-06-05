@@ -1,10 +1,18 @@
 #include "DiscomfortHwInputs.h"
+#include "../DiscomfortInput.h"
 
 // float GetMuxFloat(Mux *mux[], DaisyPatchSM *hw, int muxId, int pin)
 // {
 //   System::Delay(1);
 //   return mux[muxId]->getInput(pin, true, hw);
 // }
+
+
+float getScaledPotInput(float in)
+{
+  return map(0.5 - in, 0, 0.5, 0, 1);
+}
+
 
 DiscomfortHwInputs::DiscomfortHwInputs(DaisyPatchSM *hw, Mux **muxes) {
   this->foldAmountPot = new DiscomfortHwAnalogInput(hw, muxes[0], 3, 0);
@@ -13,6 +21,18 @@ DiscomfortHwInputs::DiscomfortHwInputs(DaisyPatchSM *hw, Mux **muxes) {
 
 void DiscomfortHwInputs::updateAll(void) {
   this->foldAmountPot->read();
+}
+
+DiscomfortInput DiscomfortHwInputs::createDiscomfortInput(float audioIn) {
+  DiscomfortInput inputs = DiscomfortInput::create();
+  inputs.input = audioIn;
+  inputs.setFolderValues(
+    map(getScaledPotInput(this->foldAmountPot->getValue()), 0.f, 1.f, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN),
+    0,
+    0
+  );
+
+  return inputs;
 }
 
 // DiscomfortHwInputs getInputsFromHw(DaisyPatchSM *hw, Mux **mux)

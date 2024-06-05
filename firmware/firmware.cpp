@@ -39,16 +39,13 @@ void initAdc()
   mux2.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, CV_6);
 }
 
-// DiscomfortOutput process(float audioIn, DiscomfortHwInputs *hwInputs, Discomfort *ch)
-// {
-//   // optimize this please
-//   // DiscomfortInput inputStruct = hardwareInputs->createDiscomfortInput(audioIn);
-//   // // DiscomfortInput dcInput = DiscomfortInput::create();
-//   // // dcInput.setFolderValues(20, 0, 0);
-//   // // dcInput.input = audioIn;
-//   // return ch->process(inputStruct);
-//   return nullptr;
-// }
+DiscomfortOutput process(float audioIn, DiscomfortHwInputs *hwInputs, Discomfort *ch)
+{
+  // optimize this please
+  DiscomfortInput inputStruct = hardwareInputs->createDiscomfortInput(audioIn);
+  return ch->process(inputStruct);
+  // return nullptr;
+}
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
@@ -59,13 +56,13 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
     // OUT_L[i] = outputL.audioOutput;
     // OUT_R[i] = outputR.audioOutput;
 
-    // OUT_L[i] = Folder::fold(IN_L[i], map(inputs.foldAmountPot, 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN), 0, 0);
-    // OUT_R[i] = 0;
+    OUT_L[i] = Folder::fold(IN_L[i], map(hardwareInputs->foldAmountPot->getValue(), 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN), 0, 0) * 0.8;
+    OUT_R[i] = 0;
 
     // // hw.WriteCvOut(1, 5.f * outputStructL.followerOutput);
     // // hw.WriteCvOut(2, 5.f * outputStructL.followerOutput);
-    OUT_L[i] = IN_L[i];
-    OUT_R[i] = IN_R[i];
+    // OUT_L[i] = IN_L[i];
+    // OUT_R[i] = IN_R[i];
   }
 }
 
@@ -94,11 +91,11 @@ int main(void)
     // this should probably block and fuck things up???
     // inputs = getInputsFromHw(&hw, muxes);
     hardwareInputs->updateAll();
-    hw.PrintLine(
-      "(%d, %d): %f",
-      hardwareInputs->foldAmountPot->muxIdx,
-      hardwareInputs->foldAmountPot->muxPin,
-      hardwareInputs->foldAmountPot->getValue()
-    );
+    // hw.PrintLine(
+    //   "(%d, %d): %f",
+    //   hardwareInputs->foldAmountPot->muxIdx,
+    //   hardwareInputs->foldAmountPot->muxPin,
+    //   hardwareInputs->foldAmountPot->getValue()
+    // );
   }
 }

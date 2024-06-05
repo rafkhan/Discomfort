@@ -20,7 +20,9 @@ DiscomfortOutput Discomfort::process(DiscomfortInput input)
   float gainStagedInput = input.input * input.inputGain;
 
   float foldOut = Folder::fold(gainStagedInput, input.foldGain, input.foldOffset, input.foldSymmetry) * 0.9;
-  float clippedOut = Clipper::clip(foldOut, input.clipperGain, input.clipperBend);
+  // output.audioOutput = foldOut;
+  // output.followerOutput = 0;
+  // float clippedOut = Clipper::clip(foldOut, input.clipperGain, input.clipperBend);
 
   // float followerAmplitude = this->follower->process(input.input, input.attack, input.decay);
 

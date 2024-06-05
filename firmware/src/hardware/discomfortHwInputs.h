@@ -11,8 +11,8 @@ using namespace patch_sm;
 
 // float GetMuxFloat(int muxId, int pin);
 
-// float getScaledPotInput(float in);
-// float getScaledCvInput(float in);
+float getScaledPotInput(float in);
+float getScaledCvInput(float in);
 // DiscomfortHwInputs getInputsFromHw(DaisyPatchSM *hw, Mux **muxes);
 
 
