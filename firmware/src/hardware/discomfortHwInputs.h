@@ -1,5 +1,5 @@
-#ifndef DISCOMFORT_INPUTS_H 
-#define DISCOMFORT_INPUTS_H
+#ifndef DISCOMFORT_HW_INPUTS_H
+#define DISCOMFORT_HW_INPUTS_H
 
 #include "daisy_patch_sm.h"
 #include "pins.h"
@@ -9,8 +9,36 @@
 using namespace daisy;
 using namespace patch_sm;
 
-struct DiscomfortHwInputs {
-  float audioIn;
+// float GetMuxFloat(int muxId, int pin);
+
+// float getScaledPotInput(float in);
+// float getScaledCvInput(float in);
+// DiscomfortHwInputs getInputsFromHw(DaisyPatchSM *hw, Mux **muxes);
+
+
+class DiscomfortHwAnalogInput
+{
+public:
+  DiscomfortHwAnalogInput(DaisyPatchSM *_hw, Mux *_mux, int _muxPin, int _muxIdx);
+  float raw;
+  float value;
+  float getValue();
+  void read(void);
+
+  int muxIdx;
+  int muxPin;
+private:
+  Mux *mux;
+  DaisyPatchSM *hw;
+};
+
+
+class DiscomfortHwInputs
+{
+public:
+  DiscomfortHwInputs(DaisyPatchSM *hw, Mux **mux);
+  DiscomfortInput createDiscomfortInput(float audioIn);
+  void updateAll(void);
 
   float inputGain;
   float outputGain;
@@ -25,8 +53,10 @@ struct DiscomfortHwInputs {
   float foldOffsetPot;
   float foldSymmetryCv;
   float foldSymmetryPot;
-  float foldAmountCv;
-  float foldAmountPot;
+
+  DiscomfortHwAnalogInput *foldAmountCv;
+  DiscomfortHwAnalogInput *foldAmountPot;
+
   float foldEnvAttenuverter;
 
   float distMixCv;
@@ -39,13 +69,5 @@ struct DiscomfortHwInputs {
   float distParamCPot;
   float distEnvAttenuverter;
 };
-
-float GetMuxFloat(int muxId, int pin);
-
-DiscomfortHwInputs getInputsFromHw(DaisyPatchSM *hw, Mux **mux);
-DiscomfortInput createDiscomfortInputFromHwInputs(float audioInput, DiscomfortHwInputs hwInputs);
-
-float getScaledPotInput(float in);
-float getScaledCvInput(float in);
 
 #endif

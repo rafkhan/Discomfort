@@ -29,6 +29,8 @@ Mux mux0;
 Mux mux1;
 Mux mux2;
 Mux *muxes[3] = {&mux0, &mux1, &mux2};
+// DiscomfortHwInputs inputs;
+DiscomfortHwInputs *hardwareInputs;
 
 void initAdc()
 {
@@ -37,26 +39,33 @@ void initAdc()
   mux2.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, CV_6);
 }
 
-DiscomfortOutput process(float audioIn, DiscomfortHwInputs hwInputs, Discomfort *ch)
-{
-  // optimize this please
-  DiscomfortInput inputStruct = createDiscomfortInputFromHwInputs(audioIn, hwInputs);
-  return ch->process(inputStruct);
-}
+// DiscomfortOutput process(float audioIn, DiscomfortHwInputs *hwInputs, Discomfort *ch)
+// {
+//   // optimize this please
+//   // DiscomfortInput inputStruct = hardwareInputs->createDiscomfortInput(audioIn);
+//   // // DiscomfortInput dcInput = DiscomfortInput::create();
+//   // // dcInput.setFolderValues(20, 0, 0);
+//   // // dcInput.input = audioIn;
+//   // return ch->process(inputStruct);
+//   return nullptr;
+// }
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
-  // this should probably block and fuck things up???
-  DiscomfortHwInputs inputs = getInputsFromHw(&hw, muxes);
-
   for (size_t i = 0; i < size; i++)
   {
-    DiscomfortOutput outputL = process(IN_L[i], inputs, &distChannelL);
-    DiscomfortOutput outputR = process(IN_L[i], inputs, &distChannelL);
-    // hw.WriteCvOut(1, 5.f * outputStructL.followerOutput);
-    // hw.WriteCvOut(2, 5.f * outputStructL.followerOutput);
-    OUT_L[i] = outputL.audioOutput;
-    OUT_R[i] = outputR.audioOutput;
+    // DiscomfortOutput outputL = process(IN_L[i], hardwareInputs, &distChannelL);
+    // DiscomfortOutput outputR = process(IN_R[i], hardwareInputs, &distChannelR);
+    // OUT_L[i] = outputL.audioOutput;
+    // OUT_R[i] = outputR.audioOutput;
+
+    // OUT_L[i] = Folder::fold(IN_L[i], map(inputs.foldAmountPot, 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN), 0, 0);
+    // OUT_R[i] = 0;
+
+    // // hw.WriteCvOut(1, 5.f * outputStructL.followerOutput);
+    // // hw.WriteCvOut(2, 5.f * outputStructL.followerOutput);
+    OUT_L[i] = IN_L[i];
+    OUT_R[i] = IN_R[i];
   }
 }
 
@@ -67,7 +76,7 @@ int main(void)
 
   System::Delay(100);
 
-  hw.SetAudioBlockSize(8);
+  hw.SetAudioBlockSize(4);
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
   sampleRate = hw.AudioSampleRate();
 
@@ -77,8 +86,19 @@ int main(void)
   distChannelR.init(sampleRate);
 
   hw.StartAudio(AudioCallback);
+  Mux *muxes[3] = {&mux0, &mux1, &mux2};
+	hardwareInputs = new DiscomfortHwInputs(&hw, muxes);
 
   while (1)
   {
+    // this should probably block and fuck things up???
+    // inputs = getInputsFromHw(&hw, muxes);
+    hardwareInputs->updateAll();
+    hw.PrintLine(
+      "(%d, %d): %f",
+      hardwareInputs->foldAmountPot->muxIdx,
+      hardwareInputs->foldAmountPot->muxPin,
+      hardwareInputs->foldAmountPot->getValue()
+    );
   }
 }

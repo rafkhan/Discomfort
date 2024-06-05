@@ -34,12 +34,11 @@ public:
 
   float dryWet;
 
-  // all 0 -> 1
   void setFolderValues(float gain, float offset, float symmetry)
   {
     this->foldGain = map(pow(gain, 2), 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN);
-    this->foldOffset = map(offset, 0, 1, FOLDER_MIN_OFFSET, FOLDER_MAX_OFFSET);
-    this->foldSymmetry = map(symmetry, 0, 1, FOLDER_MIN_SYMMETRY, FOLDER_MAX_SYMMETRY);
+    this->foldOffset = map(offset, -1, 1, FOLDER_MIN_OFFSET, FOLDER_MAX_OFFSET);
+    this->foldSymmetry = map(symmetry, -1, 1, FOLDER_MIN_SYMMETRY, FOLDER_MAX_SYMMETRY);
   }
 
   void setClipperValues(float gain, float bend)
@@ -48,6 +47,7 @@ public:
     this->clipperBend = map(bend, 0, 1, CLIPPER_MIN_BEND, CLIPPER_MAX_BEND);
   }
 
+  // empty values for development
   static DiscomfortInput create()
   {
     DiscomfortInput dcInput;
@@ -63,7 +63,7 @@ public:
     dcInput.attack = 1;
     dcInput.decay = 50;
     dcInput.envGain = 1;
-    dcInput.dryWet = 0;
+    dcInput.dryWet = 1;
 
     return dcInput;
   }

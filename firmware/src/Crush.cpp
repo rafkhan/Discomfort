@@ -1,12 +1,12 @@
-#include "Crush.h"
+// #include "Crush.h"
 
-Crush::Crush(float sampleRate) {
-  _sampleRate = sampleRate;
-  bitcrush.Init(sampleRate);
-}
+// Crush::Crush(float sampleRate) {
+//   _sampleRate = sampleRate;
+//   bitcrush.Init(sampleRate);
+// }
 
-float Crush::crush(float input, float amount) {
-  float rate = _sampleRate * (1 - (amount * amount));
-  bitcrush.SetCrushRate(rate);
-  return bitcrush.Process(input);
-}
+// float Crush::crush(float input, float amount) {
+//   float rate = _sampleRate * (1 - (amount * amount));
+//   bitcrush.SetCrushRate(rate);
+//   return bitcrush.Process(input);
+// }
