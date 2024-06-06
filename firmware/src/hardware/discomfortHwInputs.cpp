@@ -15,7 +15,7 @@ float getScaledPotInput(float in)
 
 float getScaledCvInput(float in)
 {
-  return 1.f - in;
+  return map(1.f - in, 0, 1, -1, 1);
 }
 
 
@@ -54,7 +54,7 @@ DiscomfortInput DiscomfortHwInputs::createDiscomfortInput(float audioIn) {
   inputs.input = audioIn;
 
   inputs.setFolderValues(
-    getScaledPotInput(this->foldAmountPot->getValue()),
+    fclamp(getScaledPotInput(this->foldAmountPot->getValue()) + getScaledCvInput(this->foldAmountCv->getValue()), 0, 1),
     0,
     0,
     getScaledPotInput(this->foldSymmetryPot->getValue())

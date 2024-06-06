@@ -54,25 +54,10 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   for (size_t i = 0; i < size; i++)
   {
     DiscomfortOutput outputL = process(IN_L[i], hardwareInputs, &distChannelL);
-    // DiscomfortOutput outputR = process(IN_R[i], hardwareInputs, &distChannelR);
+    DiscomfortOutput outputR = process(IN_R[i], hardwareInputs, &distChannelR);
     OUT_L[i] = outputL.audioOutput;
-    // OUT_R[i] = outputR.audioOutput;
+    OUT_R[i] = outputR.audioOutput;
 
-    // float foldGain = map(fclamp(getScaledPotInput(hardwareInputs->foldAmountPot->getValue()) + getScaledCvInput(hardwareInputs->foldAmountCv->getValue()), 0, 1), 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN);
-
-    // // TEST WITH THIS FOR NOW
-    // float foldedAudio = Folder::fold(
-    //                IN_L[i],
-    //                map(getScaledPotInput(hardwareInputs->foldAmountPot->getValue()), 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN),
-    //                0,
-    //                0) *
-    //            0.8;
-
-    // float blend = DryWet::blend(IN_L[i], foldedAudio, pow(getScaledPotInput(hardwareInputs->foldSymmetryPot->getValue()), 3));
-    
-    // OUT_L[i] = blend;
-    OUT_R[i] = 0;
- 
     // // hw.WriteCvOut(1, 5.f * outputStructL.followerOutput);
     // // hw.WriteCvOut(2, 5.f * outputStructL.followerOutput);
     // OUT_L[i] = IN_L[i];
@@ -113,12 +98,16 @@ int main(void)
 
     // hw.PrintLine();
 
-    // // hardwareInputs->updateAll();
-    // hw.PrintLine(
-    //   "(%d, %d): %f",
-    //   hardwareInputs->foldAmountPot->muxIdx,
-    //   hardwareInputs->foldAmountPot->muxPin,
-    //   hardwareInputs->foldAmountPot->getValue()
-    // );
+    // hardwareInputs->updateAll();
+    hw.PrintLine(
+        "(%d, %d): %f",
+        hardwareInputs->foldAmountPot->muxIdx,
+        hardwareInputs->foldAmountPot->muxPin,
+        // hardwareInputs->foldAmountCv->getValue()
+        fclamp(getScaledPotInput(hardwareInputs->foldAmountPot->getValue()) + getScaledCvInput(hardwareInputs->foldAmountCv->getValue()), 0, 1));
+
+    hw.PrintLine(
+        "%f",
+        getScaledCvInput(hardwareInputs->foldAmountCv->getValue()));
   }
 }
