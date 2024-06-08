@@ -1,6 +1,8 @@
 #ifndef DISCOMFORT_FOLDER_H
 #define DISCOMFORT_FOLDER_H
 
+// todo: reorder the words lol
+
 #define FOLDER_MIN_GAIN 1
 #define FOLDER_MAX_GAIN 50 
 

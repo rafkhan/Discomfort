@@ -15,6 +15,8 @@ float hardClip(float y) {
   if (y <= -0.8f) {
     return -0.8f;
   }
+
+  return y;
 }
 
 float sinClip(float y) {

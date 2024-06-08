@@ -32,22 +32,29 @@ public:
   float decay;
   float envGain;
 
-  float dryWetFold;
-  float dryWetClip;
+  float foldDryWet;
+  float clipperDryWet;
 
   void setFolderValues(float gain, float offset, float symmetry, float dryWet)
   {
     this->foldGain = map(gain, 0, 1, FOLDER_MIN_GAIN, FOLDER_MAX_GAIN);
-    this->foldOffset = map(offset, -1, 1, FOLDER_MIN_OFFSET, FOLDER_MAX_OFFSET);
-    this->foldSymmetry = map(symmetry, -1, 1, FOLDER_MIN_SYMMETRY, FOLDER_MAX_SYMMETRY);
-    this->dryWetFold = dryWet;
+    // this->foldOffset = map(offset, -1, 1, FOLDER_MIN_OFFSET, FOLDER_MAX_OFFSET);
+    // this->foldSymmetry = map(symmetry, -1, 1, FOLDER_MIN_SYMMETRY, FOLDER_MAX_SYMMETRY);
+    this->foldDryWet = dryWet;
   }
 
-  void setClipperValues(float gain, float bend)
+  void setClipperValues(float gain, float bend, float dryWet)
   {
     this->clipperGain = map(gain, 0, 1, CLIPPER_MIN_GAIN, CLIPPER_MAX_GAIN);
     this->clipperBend = map(bend, 0, 1, CLIPPER_MIN_BEND, CLIPPER_MAX_BEND);
+    this->clipperDryWet = dryWet;
   }
+
+  // void setEnvelopeValues(float gain, float attack, float decay) {
+  //   this->envGain = 1;
+  //   this->attack = 1;
+  //   this->decay = 1;
+  // }
 
   // empty values for development
   static DiscomfortInput create()
@@ -65,9 +72,16 @@ public:
     dcInput.attack = 1;
     dcInput.decay = 50;
     dcInput.envGain = 1;
-    dcInput.dryWetFold = 0;
-    dcInput.dryWetClip = 0;
+    dcInput.foldDryWet = 0;
+    dcInput.clipperDryWet = 0;
 
+    return dcInput;
+  }
+
+  static DiscomfortInput create(float audioIn)
+  {
+    DiscomfortInput dcInput = DiscomfortInput::create();
+    dcInput.input = audioIn;
     return dcInput;
   }
 };

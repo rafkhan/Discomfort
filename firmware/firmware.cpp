@@ -30,9 +30,8 @@ Mux mux0;
 Mux mux1;
 Mux mux2;
 Mux *muxes[3] = {&mux0, &mux1, &mux2};
-// DiscomfortHwInputs inputs;
 DiscomfortHwInputs *hardwareInputs;
-int muxPinIdx = 0;
+int muxPinIdx = 0; // for iterating over the all mux select pins
 
 void initAdc()
 {
@@ -43,10 +42,8 @@ void initAdc()
 
 DiscomfortOutput process(float audioIn, DiscomfortHwInputs *hwInputs, Discomfort *ch)
 {
-  // optimize this please
   DiscomfortInput inputStruct = hardwareInputs->createDiscomfortInput(audioIn);
   return ch->process(inputStruct);
-  // return nullptr;
 }
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
@@ -55,14 +52,22 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   {
     DiscomfortOutput outputL = process(IN_L[i], hardwareInputs, &distChannelL);
     DiscomfortOutput outputR = process(IN_R[i], hardwareInputs, &distChannelR);
+
     OUT_L[i] = outputL.audioOutput;
     OUT_R[i] = outputR.audioOutput;
 
     // // hw.WriteCvOut(1, 5.f * outputStructL.followerOutput);
     // // hw.WriteCvOut(2, 5.f * outputStructL.followerOutput);
-    // OUT_L[i] = IN_L[i];
-    // OUT_R[i] = IN_R[i];
   }
+}
+
+void printThing(DiscomfortHwAnalogInput *x) {
+    hw.Print(
+      "(%d, %d): %f\t",
+      x->muxIdx,
+      x->muxPin,
+      x->getValue()
+    );
 }
 
 int main(void)
@@ -93,21 +98,28 @@ int main(void)
     {
       muxPinIdx = 0;
     }
-    hardwareInputs->readMuxOnePin(muxPinIdx);
+    hardwareInputs->readMuxOnePin(&hw, muxPinIdx);
     muxPinIdx++;
+
+    hardwareInputs->distEnvAttenuverter->setValue(hw.GetAdcValue(CV_1));
+    hardwareInputs->foldEnvAttenuverter->setValue(hw.GetAdcValue(CV_2));
+    System::Delay(1);
 
     // hw.PrintLine();
 
     // hardwareInputs->updateAll();
-    hw.PrintLine(
-        "(%d, %d): %f",
-        hardwareInputs->foldAmountPot->muxIdx,
-        hardwareInputs->foldAmountPot->muxPin,
-        // hardwareInputs->foldAmountCv->getValue()
-        fclamp(getScaledPotInput(hardwareInputs->foldAmountPot->getValue()) + getScaledCvInput(hardwareInputs->foldAmountCv->getValue()), 0, 1));
-
-    hw.PrintLine(
-        "%f",
-        getScaledCvInput(hardwareInputs->foldAmountCv->getValue()));
+    // hw.PrintLine(
+    //     "(%d, %d): %f",
+    //     hardwareInputs->foldAmountPot->muxIdx,
+    //     hardwareInputs->foldAmountPot->muxPin,
+    //     fclamp(getScaledPotInput(hardwareInputs->foldAmountPot->getValue()) + getScaledCvInput(hardwareInputs->foldAmountCv->getValue()), 0, 1));
+    // printThing(hardwareInputs->distParamCPot);
+    // printThing(hardwareInputs->distParamCCv);
+    // printThing(hardwareInputs->distParamBPot);
+    // printThing(hardwareInputs->distParamBCv);
+    // printThing(hardwareInputs->foldSymmetryPot);
+    // printThing(hardwareInputs->foldEnvAttenuverter);
+    // printThing(hardwareInputs->foldEnvAttenuverter);
+    // hw.PrintLine("");
   }
 }

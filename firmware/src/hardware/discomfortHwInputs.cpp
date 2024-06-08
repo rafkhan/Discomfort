@@ -1,13 +1,6 @@
 #include "DiscomfortHwInputs.h"
 #include "../DiscomfortInput.h"
 
-// float GetMuxFloat(Mux *mux[], DaisyPatchSM *hw, int muxId, int pin)
-// {
-//   System::Delay(1);
-//   return mux[muxId]->getInput(pin, true, hw);
-// }
-
-
 float getScaledPotInput(float in)
 {
   return map(0.5 - in, 0, 0.5, 0, 1);
@@ -19,52 +12,101 @@ float getScaledCvInput(float in)
 }
 
 
-DiscomfortHwInputs::DiscomfortHwInputs(DaisyPatchSM *hw, Mux **_muxes) {
+DiscomfortHwInputs::DiscomfortHwInputs(DaisyPatchSM *hw, Mux **_muxes)
+{
   this->muxes = _muxes;
-  this->foldAmountPot = new DiscomfortHwAnalogInput(hw, this->muxes[0], 3, 0);
-  this->foldAmountCv = new DiscomfortHwAnalogInput(hw, this->muxes[0], 5, 0);
-  this->foldSymmetryPot = new DiscomfortHwAnalogInput(hw, this->muxes[0], 0, 0);
+
+  for(int a = 0; a < 8; a++) {
+    for(int b = 0; b < 8; b++) {
+      readMapper[a][b] = nullptr;
+    }
+  }
+
+  this->foldSymmetryPot  = createAnalogHwInput(hw, 0, 0);
+  this->foldSymmetryCv = createAnalogHwInput(hw, 0, 1);
+  this->foldAmountPot = createAnalogHwInput(hw, 0, 3);
+  this->foldAmountCv = createAnalogHwInput(hw, 0, 5);
+
+  this->distParamCPot = createAnalogHwInput(hw, 1, 0);
+  this->distParamBCv = createAnalogHwInput(hw, 1, 3);
+  this->distParamBPot = createAnalogHwInput(hw, 1, 5);
+  this->distParamCCv = createAnalogHwInput(hw, 1, 7);
+
+  this->foldEnvAttenuverter = createAnalogHwInput(hw, 4, 10);
+  this->distEnvAttenuverter = createAnalogHwInput(hw, 4, 10);
 }
 
-void DiscomfortHwInputs::updateAll(void) {
-  System::Delay(1);
-  this->foldAmountPot->read(true);
+DiscomfortHwAnalogInput* DiscomfortHwInputs::createAnalogHwInput(DaisyPatchSM *hw, int mux, int pin) {
+  DiscomfortHwAnalogInput *i = new DiscomfortHwAnalogInput(hw, this->muxes[mux], pin, mux);
+  this->readMapper[mux][pin] = i;
+  return i;
 }
 
-void DiscomfortHwInputs::readMuxOnePin(int pin) {
+
+
+void DiscomfortHwInputs::updateAll(void) {}
+
+void DiscomfortHwInputs::readMuxOnePin(DaisyPatchSM *hw, int pin)
+{
   this->muxes[0]->setBits(pin);
   System::Delay(1);
+  
 
-  if(pin == 3) {
-    this->foldAmountPot->read(false);
+  for(int i = 0; i < 3; i++) {
+    DiscomfortHwAnalogInput *input = this->readMapper[i][pin];
+    if(input != nullptr) {
+      input->read(false);
+    }
   }
 
-  if(pin == 5) {
-    this->foldAmountCv->read(false);
-  }
 
-  if(pin == 0) {
-    this->foldSymmetryPot->read(false);
-  }
+  this->distEnvAttenuverter->setValue(hw->GetAdcValue(CV_1));
+  this->foldEnvAttenuverter->setValue(hw->GetAdcValue(CV_2));
+  hw->PrintLine("asd %f", this->distEnvAttenuverter->getValue());
+
+  // THIS IS BRAIN DEAD CODE
+
+  // if (pin == 3)
+  // {
+  //   this->foldAmountPot->read(false);
+  // }
+
+  // if (pin == 5)
+  // {
+  //   this->foldAmountCv->read(false);
+  // }
+
+  // if (pin == 0)
+  // {
+  //   this->foldSymmetryPot->read(false);
+  //   this->distParamCPot->read(false);
+  // }
 }
 
-
-DiscomfortInput DiscomfortHwInputs::createDiscomfortInput(float audioIn) {
+DiscomfortInput DiscomfortHwInputs::createDiscomfortInput(float audioIn)
+{
   DiscomfortInput inputs = DiscomfortInput::create();
   inputs.input = audioIn;
 
   inputs.setFolderValues(
-    fclamp(getScaledPotInput(this->foldAmountPot->getValue()) + getScaledCvInput(this->foldAmountCv->getValue()), 0, 1),
-    0,
-    0,
-    getScaledPotInput(this->foldSymmetryPot->getValue())
-  );
+      fclamp(getScaledPotInput(this->foldAmountPot->getValue()) + getScaledCvInput(this->foldAmountCv->getValue()), 0, 1),
+      0,
+      0,
+      getScaledPotInput(this->foldSymmetryPot->getValue())); // temporary mix knob
 
+    inputs.setClipperValues(
+      getScaledPotInput(this->distParamCPot->getValue()),
+      0,
+      getScaledPotInput(this->distParamBPot->getValue())
+    );
+
+  // inputs.setClipperValues(0, 0, 0);
 
   return inputs;
 }
 
-DiscomfortHwAnalogInput::DiscomfortHwAnalogInput(DaisyPatchSM *_hw, Mux *_mux, int _muxPin, int _muxIdx) {
+DiscomfortHwAnalogInput::DiscomfortHwAnalogInput(DaisyPatchSM *_hw, Mux *_mux, int _muxPin, int _muxIdx)
+{
   muxIdx = _muxIdx;
   muxPin = _muxPin;
   mux = _mux;
@@ -73,15 +115,22 @@ DiscomfortHwAnalogInput::DiscomfortHwAnalogInput(DaisyPatchSM *_hw, Mux *_mux, i
   value = 0.f;
 }
 
-float DiscomfortHwAnalogInput::getValue() {
+void DiscomfortHwAnalogInput::setValue(float _value) {
+  this->value = value;
+}
+
+float DiscomfortHwAnalogInput::getValue()
+{
   return this->value;
 }
 
-void DiscomfortHwAnalogInput::setMuxBits(int pin) {
+void DiscomfortHwAnalogInput::read(bool writePins)
+{
+  this->value = mux->getInput(muxPin, writePins, hw);
 }
 
-void DiscomfortHwAnalogInput::read(bool writePins) {
-  this->value = mux->getInput(muxPin, writePins, hw);
+void DiscomfortHwAnalogInput::setMuxBits(int pin)
+{
 }
 
 // DiscomfortHwInputs getInputsFromHw(DaisyPatchSM *hw, Mux **mux)

@@ -17,17 +17,17 @@ void Discomfort::init(float sampleRate)
 
 DiscomfortOutput Discomfort::process(DiscomfortInput input)
 {
+  // Add envelope gain!!!
+  float followerAmplitude = this->follower->process(input.input * input.envGain, input.attack, input.decay);
+
   float gainStagedInput = input.input * input.inputGain;
+  float foldOut = Folder::fold(gainStagedInput, input.foldGain, input.foldOffset, input.foldSymmetry);
+  float foldBlend = DryWet::blend(gainStagedInput, foldOut, pow(input.foldDryWet, 2));
+  float clippedOut = Clipper::clip(foldBlend, input.clipperGain, input.clipperBend);
+  float clippedBlend = DryWet::blend(foldBlend, clippedOut, pow(input.clipperDryWet, 2));
+  float output = clippedBlend * input.outputGain;
 
-  float foldOut = Folder::fold(gainStagedInput, input.foldGain, input.foldOffset, input.foldSymmetry) * 0.9;
-  float foldBlend = DryWet::blend(gainStagedInput, foldOut, pow(input.dryWetFold, 3));
-  // output.audioOutput = foldOut;
-  // output.followerOutput = 0;
-  // float clippedOut = Clipper::clip(foldOut, input.clipperGain, input.clipperBend);
-
-  // float followerAmplitude = this->follower->process(input.input, input.attack, input.decay);
-
-  return this->createOutput(foldBlend, 0);
+  return this->createOutput(output * 0.7, followerAmplitude);
 }
 
 DiscomfortOutput Discomfort::createOutput(float audio, float follower)

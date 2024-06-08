@@ -14,7 +14,7 @@ CPP_SOURCES += src/Follower.cpp
 CPP_SOURCES += src/Crush.cpp
 CPP_SOURCES += src/FilterBank.cpp
 CPP_SOURCES += src/util.cpp
-CPP_SOURCES += src/hardware/DiscomfortHwInputs.cpp
+CPP_SOURCES += src/hardware/discomfortHwInputs.cpp
 CPP_SOURCES += src/hardware/mux.cpp
 CPP_SOURCES += src/hardware/pins.cpp
 

@@ -15,7 +15,6 @@ float getScaledPotInput(float in);
 float getScaledCvInput(float in);
 // DiscomfortHwInputs getInputsFromHw(DaisyPatchSM *hw, Mux **muxes);
 
-
 class DiscomfortHwAnalogInput
 {
 public:
@@ -23,16 +22,17 @@ public:
   float raw;
   float value;
   float getValue();
+  void setValue(float _value);
   void read(bool writePins);
   void setMuxBits(int pin);
 
   int muxIdx;
   int muxPin;
+
 private:
   Mux *mux;
   DaisyPatchSM *hw;
 };
-
 
 class DiscomfortHwInputs
 {
@@ -40,39 +40,43 @@ public:
   DiscomfortHwInputs(DaisyPatchSM *hw, Mux **_muxes);
   DiscomfortInput createDiscomfortInput(float audioIn);
   void updateAll(void);
-  void readMuxOnePin(int pin);
+  void readMuxOnePin(DaisyPatchSM *hw, int pin);
 
   Mux **muxes;
 
+  DiscomfortHwAnalogInput *inputGain;
+  DiscomfortHwAnalogInput *outputGain;
 
-  float inputGain;
-  float outputGain;
+  DiscomfortHwAnalogInput *envGain;
+  DiscomfortHwAnalogInput *envAttack;
+  DiscomfortHwAnalogInput *envDecay;
 
-  float envGain;
-  float envAttack;
-  float envDecay;
-
-  float foldMixCv;
-  float foldMixPot;
-  float foldOffsetCv;
-  float foldOffsetPot;
+  DiscomfortHwAnalogInput *foldMixCv;
+  DiscomfortHwAnalogInput *foldMixPot;
+  DiscomfortHwAnalogInput *foldOffsetCv;
+  DiscomfortHwAnalogInput *foldOffsetPot;
   DiscomfortHwAnalogInput *foldSymmetryCv;
   DiscomfortHwAnalogInput *foldSymmetryPot;
 
   DiscomfortHwAnalogInput *foldAmountCv;
   DiscomfortHwAnalogInput *foldAmountPot;
 
-  float foldEnvAttenuverter;
+  DiscomfortHwAnalogInput *foldEnvAttenuverter;
 
-  float distMixCv;
-  float distMixPot;
-  float distParamACv;
-  float distParamAPot;
-  float distParamBCv;
-  float distParamBPot;
-  float distParamCCv;
-  float distParamCPot;
-  float distEnvAttenuverter;
+  DiscomfortHwAnalogInput *distMixCv;
+  DiscomfortHwAnalogInput *distMixPot;
+  DiscomfortHwAnalogInput *distParamACv;
+  DiscomfortHwAnalogInput *distParamAPot;
+  DiscomfortHwAnalogInput *distParamBCv;
+  DiscomfortHwAnalogInput *distParamBPot;
+  DiscomfortHwAnalogInput *distParamCCv;
+  DiscomfortHwAnalogInput *distParamCPot;
+  DiscomfortHwAnalogInput *distEnvAttenuverter;
+
+private:
+  // convenience code for me as I develop lol
+  DiscomfortHwAnalogInput *readMapper[3][8];
+  DiscomfortHwAnalogInput* createAnalogHwInput(DaisyPatchSM *hw, int mux, int pin);
 };
 
 #endif
