@@ -26,12 +26,17 @@ dsy_gpio muxSelect0;
 dsy_gpio muxSelect1;
 dsy_gpio muxSelect2;
 
+dsy_gpio btn1Pin;
+
 Mux mux0;
 Mux mux1;
 Mux mux2;
 Mux *muxes[3] = {&mux0, &mux1, &mux2};
 DiscomfortHwInputs *hardwareInputs;
 int muxPinIdx = 0; // for iterating over the all mux select pins
+
+Switch button1;
+Switch button2;
 
 void initAdc()
 {
@@ -42,6 +47,7 @@ void initAdc()
 
 DiscomfortOutput process(float audioIn, DiscomfortHwInputs *hwInputs, Discomfort *ch)
 {
+  
   DiscomfortInput inputStruct = hardwareInputs->createDiscomfortInput(audioIn);
   return ch->process(inputStruct);
 }
@@ -86,9 +92,19 @@ int main(void)
   distChannelL.init(sampleRate);
   distChannelR.init(sampleRate);
 
-  hw.StartAudio(AudioCallback);
+  dsy_gpio gpio;
+ 	gpio.pin = DaisyPatchSM::B7;
+	gpio.mode = DSY_GPIO_MODE_OUTPUT_PP;
+	gpio.pull = DSY_GPIO_NOPULL;
+	dsy_gpio_init(&gpio); 
+
+  button1.Init(DaisyPatchSM::B8, 1000);
+  button2.Init(DaisyPatchSM::C6, 1000);
+
   Mux *muxes[3] = {&mux0, &mux1, &mux2};
   hardwareInputs = new DiscomfortHwInputs(&hw, muxes);
+
+  hw.StartAudio(AudioCallback);
 
   while (1)
   {
@@ -101,9 +117,18 @@ int main(void)
     hardwareInputs->readMuxOnePin(&hw, muxPinIdx);
     muxPinIdx++;
 
+    button1.Debounce();
+    button2.Debounce();
+    bool b1 = button1.Pressed();
+    bool b2 = button2.Pressed();
+
+    dsy_gpio_write(&gpio, b1);
+
+    hw.PrintLine("%d %d", b1, b2);
+
     hardwareInputs->distEnvAttenuverter->setValue(hw.GetAdcValue(CV_1));
     hardwareInputs->foldEnvAttenuverter->setValue(hw.GetAdcValue(CV_2));
-    System::Delay(1);
+    System::Delay(1); // MAYBE EXTRA SLEEP??????
 
     // hw.PrintLine();
 

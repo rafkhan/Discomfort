@@ -11,18 +11,19 @@ float getScaledCvInput(float in)
   return map(1.f - in, 0, 1, -1, 1);
 }
 
-
 DiscomfortHwInputs::DiscomfortHwInputs(DaisyPatchSM *hw, Mux **_muxes)
 {
   this->muxes = _muxes;
 
-  for(int a = 0; a < 8; a++) {
-    for(int b = 0; b < 8; b++) {
+  for (int a = 0; a < 8; a++)
+  {
+    for (int b = 0; b < 8; b++)
+    {
       readMapper[a][b] = nullptr;
     }
   }
 
-  this->foldSymmetryPot  = createAnalogHwInput(hw, 0, 0);
+  this->foldSymmetryPot = createAnalogHwInput(hw, 0, 0);
   this->foldSymmetryCv = createAnalogHwInput(hw, 0, 1);
   this->foldAmountPot = createAnalogHwInput(hw, 0, 3);
   this->foldAmountCv = createAnalogHwInput(hw, 0, 5);
@@ -36,13 +37,12 @@ DiscomfortHwInputs::DiscomfortHwInputs(DaisyPatchSM *hw, Mux **_muxes)
   this->distEnvAttenuverter = createAnalogHwInput(hw, 4, 10);
 }
 
-DiscomfortHwAnalogInput* DiscomfortHwInputs::createAnalogHwInput(DaisyPatchSM *hw, int mux, int pin) {
+DiscomfortHwAnalogInput *DiscomfortHwInputs::createAnalogHwInput(DaisyPatchSM *hw, int mux, int pin)
+{
   DiscomfortHwAnalogInput *i = new DiscomfortHwAnalogInput(hw, this->muxes[mux], pin, mux);
   this->readMapper[mux][pin] = i;
   return i;
 }
-
-
 
 void DiscomfortHwInputs::updateAll(void) {}
 
@@ -50,19 +50,19 @@ void DiscomfortHwInputs::readMuxOnePin(DaisyPatchSM *hw, int pin)
 {
   this->muxes[0]->setBits(pin);
   System::Delay(1);
-  
 
-  for(int i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++)
+  {
     DiscomfortHwAnalogInput *input = this->readMapper[i][pin];
-    if(input != nullptr) {
+    if (input != nullptr)
+    {
       input->read(false);
     }
   }
 
-
   this->distEnvAttenuverter->setValue(hw->GetAdcValue(CV_1));
   this->foldEnvAttenuverter->setValue(hw->GetAdcValue(CV_2));
-  hw->PrintLine("asd %f", this->distEnvAttenuverter->getValue());
+  // hw->PrintLine("asd %f", this->distEnvAttenuverter->getValue());
 
   // THIS IS BRAIN DEAD CODE
 
@@ -94,13 +94,10 @@ DiscomfortInput DiscomfortHwInputs::createDiscomfortInput(float audioIn)
       0,
       getScaledPotInput(this->foldSymmetryPot->getValue())); // temporary mix knob
 
-    inputs.setClipperValues(
+  inputs.setClipperValues(
       getScaledPotInput(this->distParamCPot->getValue()),
       0,
-      getScaledPotInput(this->distParamBPot->getValue())
-    );
-
-  // inputs.setClipperValues(0, 0, 0);
+      getScaledPotInput(this->distParamBPot->getValue()));
 
   return inputs;
 }
@@ -115,7 +112,8 @@ DiscomfortHwAnalogInput::DiscomfortHwAnalogInput(DaisyPatchSM *_hw, Mux *_mux, i
   value = 0.f;
 }
 
-void DiscomfortHwAnalogInput::setValue(float _value) {
+void DiscomfortHwAnalogInput::setValue(float _value)
+{
   this->value = value;
 }
 
