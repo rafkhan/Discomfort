@@ -38,6 +38,9 @@ int muxPinIdx = 0; // for iterating over the all mux select pins
 Switch button1;
 Switch button2;
 
+DiscomfortOutput *outputL;
+DiscomfortOutput *outputR;
+
 void initAdc()
 {
   mux0.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, CV_8);
@@ -56,14 +59,19 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 {
   for (size_t i = 0; i < size; i++)
   {
-    DiscomfortOutput outputL = process(IN_L[i], hardwareInputs, &distChannelL);
-    DiscomfortOutput outputR = process(IN_R[i], hardwareInputs, &distChannelR);
+    DiscomfortOutput newL = process(IN_L[i], hardwareInputs, &distChannelL);
+    DiscomfortOutput newR = process(IN_R[i], hardwareInputs, &distChannelR);
 
-    OUT_L[i] = outputL.audioOutput;
-    OUT_R[i] = outputR.audioOutput;
+    outputL->audioOutput = newL.audioOutput;
+    outputL->followerOutput = newL.followerOutput;
+    outputR->audioOutput = newL.audioOutput;
+    outputR->followerOutput = newL.followerOutput;
 
-    // // hw.WriteCvOut(1, 5.f * outputStructL.followerOutput);
-    // // hw.WriteCvOut(2, 5.f * outputStructL.followerOutput);
+    OUT_L[i] = outputL->audioOutput;
+    OUT_R[i] = outputR->audioOutput;
+
+    hw.WriteCvOut(1, 5.f * outputL->followerOutput);
+    hw.WriteCvOut(2, 5.f * outputL->followerOutput);
   }
 }
 
@@ -84,7 +92,7 @@ int main(void)
   System::Delay(100);
 
   hw.SetAudioBlockSize(16);
-  hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
+  hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_96KHZ);
   sampleRate = hw.AudioSampleRate();
 
   initAdc();
@@ -92,6 +100,7 @@ int main(void)
   distChannelL.init(sampleRate);
   distChannelR.init(sampleRate);
 
+  // LED
   dsy_gpio gpio;
  	gpio.pin = DaisyPatchSM::B7;
 	gpio.mode = DSY_GPIO_MODE_OUTPUT_PP;
@@ -128,23 +137,8 @@ int main(void)
 
     hardwareInputs->distEnvAttenuverter->setValue(hw.GetAdcValue(CV_1));
     hardwareInputs->foldEnvAttenuverter->setValue(hw.GetAdcValue(CV_2));
-    System::Delay(1); // MAYBE EXTRA SLEEP??????
 
-    // hw.PrintLine();
-
-    // hardwareInputs->updateAll();
-    // hw.PrintLine(
-    //     "(%d, %d): %f",
-    //     hardwareInputs->foldAmountPot->muxIdx,
-    //     hardwareInputs->foldAmountPot->muxPin,
-    //     fclamp(getScaledPotInput(hardwareInputs->foldAmountPot->getValue()) + getScaledCvInput(hardwareInputs->foldAmountCv->getValue()), 0, 1));
-    // printThing(hardwareInputs->distParamCPot);
-    // printThing(hardwareInputs->distParamCCv);
-    // printThing(hardwareInputs->distParamBPot);
-    // printThing(hardwareInputs->distParamBCv);
-    // printThing(hardwareInputs->foldSymmetryPot);
+    // System::Delay(1); // IS THIS MAYBE EXTRA SLEEP??????
     // printThing(hardwareInputs->foldEnvAttenuverter);
-    // printThing(hardwareInputs->foldEnvAttenuverter);
-    // hw.PrintLine("");
   }
 }

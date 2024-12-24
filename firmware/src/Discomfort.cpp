@@ -27,7 +27,7 @@ DiscomfortOutput Discomfort::process(DiscomfortInput input)
   float clippedBlend = DryWet::blend(foldBlend, clippedOut, pow(input.clipperDryWet, 2));
   float output = clippedBlend * input.outputGain;
 
-  return this->createOutput(output * 0.7, followerAmplitude);
+  return this->createOutput(output * 0.95, followerAmplitude);
 }
 
 DiscomfortOutput Discomfort::createOutput(float audio, float follower)

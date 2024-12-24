@@ -62,25 +62,6 @@ void DiscomfortHwInputs::readMuxOnePin(DaisyPatchSM *hw, int pin)
 
   this->distEnvAttenuverter->setValue(hw->GetAdcValue(CV_1));
   this->foldEnvAttenuverter->setValue(hw->GetAdcValue(CV_2));
-  // hw->PrintLine("asd %f", this->distEnvAttenuverter->getValue());
-
-  // THIS IS BRAIN DEAD CODE
-
-  // if (pin == 3)
-  // {
-  //   this->foldAmountPot->read(false);
-  // }
-
-  // if (pin == 5)
-  // {
-  //   this->foldAmountCv->read(false);
-  // }
-
-  // if (pin == 0)
-  // {
-  //   this->foldSymmetryPot->read(false);
-  //   this->distParamCPot->read(false);
-  // }
 }
 
 DiscomfortInput DiscomfortHwInputs::createDiscomfortInput(float audioIn)
