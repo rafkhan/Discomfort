@@ -4,16 +4,14 @@ TARGET = firmware
 LDFLAGS += -u _printf_float
 
 CPP_SOURCES = firmware.cpp
-
-# Sources
-CPP_SOURCES += src/Discomfort.cpp
-CPP_SOURCES += src/Folder.cpp
-CPP_SOURCES += src/Clipper.cpp
-CPP_SOURCES += src/DryWet.cpp
-CPP_SOURCES += src/Follower.cpp
-CPP_SOURCES += src/Crush.cpp
-CPP_SOURCES += src/FilterBank.cpp
-CPP_SOURCES += src/util.cpp
+CPP_SOURCES += src/DiscomfortInternal/Discomfort.cpp
+CPP_SOURCES += src/DiscomfortInternal/Folder.cpp
+CPP_SOURCES += src/DiscomfortInternal/Clipper.cpp
+CPP_SOURCES += src/DiscomfortInternal/DryWet.cpp
+CPP_SOURCES += src/DiscomfortInternal/Follower.cpp
+CPP_SOURCES += src/DiscomfortInternal/Crush.cpp
+CPP_SOURCES += src/DiscomfortInternal/FilterBank.cpp
+CPP_SOURCES += src/DiscomfortInternal/util.cpp
 CPP_SOURCES += src/hardware/discomfortHwInputs.cpp
 CPP_SOURCES += src/hardware/mux.cpp
 CPP_SOURCES += src/hardware/pins.cpp

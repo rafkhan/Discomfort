@@ -1,12 +1,12 @@
 #include "daisy_patch_sm.h"
 #include "daisysp.h"
 
-#include "src/Discomfort.h"
-#include "src/util.h"
-#include "src/Clipper.h"
-#include "src/Folder.h"
-#include "src/FilterBank.h"
-#include "src/DryWet.h"
+#include "src/DiscomfortInternal/Discomfort.h"
+#include "src/DiscomfortInternal/util.h"
+#include "src/DiscomfortInternal/Clipper.h"
+#include "src/DiscomfortInternal/Folder.h"
+#include "src/DiscomfortInternal/FilterBank.h"
+#include "src/DiscomfortInternal/DryWet.h"
 
 #include "src/hardware/mux.h"
 #include "src/hardware/discomfortHwInputs.h"

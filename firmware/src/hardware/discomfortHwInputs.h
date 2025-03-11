@@ -4,7 +4,7 @@
 #include "daisy_patch_sm.h"
 #include "pins.h"
 #include "mux.h"
-#include "../DiscomfortInput.h"
+#include "../DiscomfortInternal/DiscomfortInput.h"
 
 using namespace daisy;
 using namespace patch_sm;

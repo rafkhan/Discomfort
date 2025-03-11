@@ -1,5 +1,5 @@
 #include "discomfortHwInputs.h"
-#include "../DiscomfortInput.h"
+#include "../DiscomfortInternal/DiscomfortInput.h"
 
 float getScaledPotInput(float in)
 {
