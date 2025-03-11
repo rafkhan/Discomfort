@@ -26,8 +26,8 @@ CPP_SOURCES += src/hardware/pins.cpp
 
 # CPP_SOURCES += $(DISCOMFORT_CPP_SOURCES)
 # Library Locations
-LIBDAISY_DIR = ../DaisyExamples/libDaisy/
-DAISYSP_DIR = ../DaisyExamples/DaisySP/
+LIBDAISY_DIR = ./DaisyExamples/libDaisy
+DAISYSP_DIR = DaisyExamples/DaisySP
 
 # Core location, and generic Makefile.
 SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core

@@ -1,0 +1,3 @@
+[submodule "firmware/DaisyExamples"]
+	path = firmware/DaisyExamples
+	url = git@github.com:electro-smith/DaisyExamples.git
