@@ -32,8 +32,9 @@ float Mux::getInput(int pin, bool writeSelectPins, DaisyPatchSM *hw) {
     dsy_gpio_write(s2, (bool) ((pin >> 2) & 1));
   }
 
-  hw->ProcessAnalogControls();
-  return hw->GetAdcValue(this->cvIdx);
+  // hw->ProcessAnalogControls();
+  // return hw->GetAdcValue(this->cvIdx);
+  return hw->adc.GetFloat(this->cvIdx);
 }
 
 void Mux::setBits(int pin) {

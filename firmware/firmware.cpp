@@ -33,11 +33,13 @@ Mux *muxes[3] = {&mux0, &mux1, &mux2};
 DiscomfortHwInputs *hardwareInputs;
 int muxPinIdx = 0; // for iterating over the all mux select pins
 
+float asd[4] = { 0, 0, 0, 0 };
+
 void initAdc()
 {
-  mux0.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, CV_8);
-  mux1.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, CV_7);
-  mux2.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, CV_6);
+  mux0.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, 0);
+  mux1.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, 1);
+  mux2.init(&muxSelect0, &muxSelect1, &muxSelect2, &hw, 2);
 }
 
 DiscomfortOutput process(float audioIn, DiscomfortHwInputs *hwInputs, Discomfort *ch)
@@ -48,6 +50,25 @@ DiscomfortOutput process(float audioIn, DiscomfortHwInputs *hwInputs, Discomfort
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
+  // hardwareInputs->readMuxOnePin(&hw, muxPinIdx);
+
+  for(int i = 0; i < 4; i++) {
+    // muxes[0]->setBits(i);
+    // dsy_gpio_write(&muxSelect0, (bool) ((i >> 0) & 1));
+    // dsy_gpio_write(&muxSelect0, (bool) ((i >> 1) & 1));
+    // dsy_gpio_write(&muxSelect0, (bool) ((i >> 2) & 1));
+    asd[i] = hw.adc.GetFloat(0);
+
+    // DiscomfortHwAnalogInput *input = this->readMapper[i][pin];
+    // if(input != nullptr) {
+    //   // input->read(false);
+    //   input->setValue(hw->adc.GetFloat(0));
+    // }
+    // System::Delay(1);
+    // hw->Print("%d, %f \t", i, hw->adc.GetFloat(0));
+  }
+
+
   for (size_t i = 0; i < size; i++)
   {
     DiscomfortOutput outputL = process(IN_L[i], hardwareInputs, &distChannelL);
@@ -62,7 +83,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 }
 
 void printThing(DiscomfortHwAnalogInput *x) {
-    hw.Print(
+    hw.PrintLine(
       "(%d, %d): %f\t",
       x->muxIdx,
       x->muxPin,
@@ -73,15 +94,31 @@ void printThing(DiscomfortHwAnalogInput *x) {
 int main(void)
 {
   hw.Init();
-  hw.StartLog();
 
-  System::Delay(100);
+  hw.adc.Stop();
 
-  hw.SetAudioBlockSize(16);
-  hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
-  sampleRate = hw.AudioSampleRate();
+  AdcChannelConfig adc[3];
+  adc[0].InitSingle(hw.C7);
+  adc[1].InitSingle(hw.C6);
+  adc[2].InitSingle(hw.C5);
+  // adc[3].InitSingle(hw.C6);
+  // adc[4].InitSingle(hw.C5);
+  // adc[5].InitSingle(hw.C4);
+  // adc[6].InitSingle(hw.C3);
+  // adc[7].InitSingle(hw.C2);
+  // adc[8].InitSingle(hw.C1);
+
+  hw.adc.Init(adc, 3);
+  hw.adc.Start();
 
   initAdc();
+
+  hw.StartLog();
+  System::Delay(100);
+
+  hw.SetAudioBlockSize(8);
+  hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
+  sampleRate = hw.AudioSampleRate();
 
   distChannelL.init(sampleRate);
   distChannelR.init(sampleRate);
@@ -90,20 +127,29 @@ int main(void)
   Mux *muxes[3] = {&mux0, &mux1, &mux2};
   hardwareInputs = new DiscomfortHwInputs(&hw, muxes);
 
+  dsy_gpio_write(&muxSelect0, (bool) ((3 >> 0) & 1));
+  dsy_gpio_write(&muxSelect0, (bool) ((3 >> 1) & 1));
+  dsy_gpio_write(&muxSelect0, (bool) ((3 >> 2) & 1));
+
   while (1)
   {
+    for (int i = 0; i < 4; i++) {
+      hw.PrintLine("asd[%d]: %f", i, asd[i]);
+    }
+    hw.PrintLine("");
+
     // this should probably block and fuck things up???
     // inputs = getInputsFromHw(&hw, muxes);
-    if (muxPinIdx % 8 == 0)
-    {
-      muxPinIdx = 0;
-    }
-    hardwareInputs->readMuxOnePin(&hw, muxPinIdx);
-    muxPinIdx++;
+    // if (muxPinIdx % 8 == 0)
+    // {
+    //   muxPinIdx = 0;
+    // }
+    // muxPinIdx++;
 
-    hardwareInputs->distEnvAttenuverter->setValue(hw.GetAdcValue(CV_1));
-    hardwareInputs->foldEnvAttenuverter->setValue(hw.GetAdcValue(CV_2));
-    System::Delay(1);
+    // hardwareInputs->distEnvAttenuverter->setValue(hw.GetAdcValue(CV_1));
+    // hardwareInputs->foldEnvAttenuverter->setValue(hw.GetAdcValue(CV_2));
+    // System::Delay(1);
+    // printThing(hardwareInputs->foldAmountPot);
 
     // hw.PrintLine();
 
