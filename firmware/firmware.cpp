@@ -22,6 +22,8 @@ Discomfort distChannelL;
 Discomfort distChannelR;
 
 float a = 0;
+float b = 0;
+float c = 0;
 
 // Can move into mux class probably
 dsy_gpio muxSelect0;
@@ -36,6 +38,8 @@ DiscomfortHwInputs *hardwareInputs;
 int muxPinIdx = 0; // for iterating over the all mux select pins
 
 float asd[4] = { 0, 0, 0, 0 };
+
+DiscomfortHwAnalogInput* testInput = nullptr;
 
 void initAdc()
 {
@@ -104,28 +108,24 @@ int main(void)
 
   while (1)
   {
-    for (int i = 0; i < 4; i++) {
-      hw.PrintLine("asd[%d]: %f", i, asd[i]);
-    }
-    hw.PrintLine("");
+    hw.PrintLine("%.3f %.3f %.3f", a, b, c);
 
-    // this should probably block and fuck things up???
-    // inputs = getInputsFromHw(&hw, muxes);
-    if (muxPinIdx % 8 == 0)
-    {
-      muxPinIdx = 0;
-    }
-    muxPinIdx++;
-
-    // Set select pins
+    // // this should probably block and fuck things up???
+    // // inputs = getInputsFromHw(&hw, muxes);
+    // if (muxPinIdx % 8 == 0)
+    // {
+    //   muxPinIdx = 0;
+    // }
+    
     dsy_gpio_write(&muxSelect0, (bool) ((muxPinIdx >> 0) & 1));
     dsy_gpio_write(&muxSelect1, (bool) ((muxPinIdx >> 1) & 1));
     dsy_gpio_write(&muxSelect2, (bool) ((muxPinIdx >> 2) & 1));
 
-    if(muxPinIdx == 0) {
-      a = hw.adc.GetFloat(0);
-    }
-    float b = hw.adc.GetFloat(1);
-    float c = hw.adc.GetFloat(2);
+    a = hw.adc.GetFloat(0);
+    b = hw.adc.GetFloat(1);
+    c = hw.adc.GetFloat(2); // channel 2 not connected to anything?
+
+    // muxPinIdx++;
+    System::Delay(1);
   }
 }
