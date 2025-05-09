@@ -24,6 +24,9 @@ Discomfort distChannelR;
 float a = 0;
 float b = 0;
 float c = 0;
+float d = 0;
+float e = 0;
+float f = 0;
 
 // Can move into mux class probably
 dsy_gpio muxSelect0;
@@ -108,7 +111,7 @@ int main(void)
 
   while (1)
   {
-    hw.PrintLine("%.3f %.3f %.3f", a, b, c);
+    hw.PrintLine("%.3f %.3f %.3f | %.3f %.3f %.3f", a, b, c, d, e, f);
 
     // // this should probably block and fuck things up???
     // // inputs = getInputsFromHw(&hw, muxes);
@@ -116,14 +119,28 @@ int main(void)
     // {
     //   muxPinIdx = 0;
     // }
+
+    muxPinIdx = 0;
     
     dsy_gpio_write(&muxSelect0, (bool) ((muxPinIdx >> 0) & 1));
     dsy_gpio_write(&muxSelect1, (bool) ((muxPinIdx >> 1) & 1));
     dsy_gpio_write(&muxSelect2, (bool) ((muxPinIdx >> 2) & 1));
 
     a = hw.adc.GetFloat(0);
-    b = hw.adc.GetFloat(1);
+    b = hw.adc.GetFloat(1); // envelope knob
     c = hw.adc.GetFloat(2); // channel 2 not connected to anything?
+
+    System::Delay(1);
+
+    muxPinIdx = 1;
+    
+    dsy_gpio_write(&muxSelect0, (bool) ((muxPinIdx >> 0) & 1));
+    dsy_gpio_write(&muxSelect1, (bool) ((muxPinIdx >> 1) & 1));
+    dsy_gpio_write(&muxSelect2, (bool) ((muxPinIdx >> 2) & 1));    
+    
+    d = hw.adc.GetFloat(0); // fold symmetry knob
+    e = hw.adc.GetFloat(1); // dist amount knob
+    f = hw.adc.GetFloat(2); // channel 2 not connected to anything?
 
     // muxPinIdx++;
     System::Delay(1);
